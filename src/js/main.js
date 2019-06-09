@@ -19,8 +19,21 @@ const BLOCK_RED = 1;
 const BLOCK_YELLOW = 2;
 const BLOCK_GREEN = 3;
 
-const blocks = [xSquareCount * ySquareCount];
+class Grid {
+  constructor(xCount, yCount) {
+    this.blocks = [xCount * yCount];
+  }
 
+  getBlock(x, y) {
+    return this.blocks[x * ySquareCount + y];
+  }
+
+  setBlock(x, y, type) {
+    this.blocks[x * ySquareCount + y] = type;
+  }
+}
+
+const grid = new Grid(xSquareCount, ySquareCount);
 
 function getColor(block, x, y) {
   switch (block) {
@@ -38,7 +51,7 @@ function getColor(block, x, y) {
 function drawGrid() {
   for (let x = 0; x < xSquareCount; x++) {
     for (let y = 0; y < ySquareCount; y++) {
-      const block = blocks[x * ySquareCount + y];
+      const block = grid.getBlock(x, y);
       ctx.fillStyle = getColor(block, x, y);
       ctx.fillRect(x * squareWidth, y * squareHeight, squareWidth, squareHeight);
     }
@@ -75,7 +88,7 @@ function initializeGame() {
 
   for (let x = 0; x < xSquareCount; x++) {
     for (let y = 0; y < ySquareCount; y++) {
-      blocks[x * ySquareCount + y] = blockTypes[Math.floor(Math.random() * blockTypes.length)];
+      grid.setBlock(x, y, blockTypes[Math.floor(Math.random() * blockTypes.length)]);
     }
   }
 
@@ -86,7 +99,7 @@ function initializeGame() {
     const y = Math.floor(mouseY / squareHeight);
 
     if (x < xSquareCount && y < ySquareCount) {
-      blocks[x * ySquareCount + y] = BLOCK_NONE;
+      grid.setBlock(x, y, BLOCK_NONE);
     }
   });
 }
