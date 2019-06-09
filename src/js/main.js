@@ -14,6 +14,7 @@ const ySquareCount = Math.floor(canvas.height / squareHeight);
 let deltaTimeMs = 0;
 let lastTimeStampMs = 0;
 
+const BLOCK_NONE = 0;
 const BLOCK_RED = 1;
 const BLOCK_YELLOW = 2;
 const BLOCK_GREEN = 3;
@@ -44,6 +45,22 @@ function drawGrid() {
   }
 }
 
+function listenMouseClicks(element, handler) {
+  function mouseUp(e) {
+    const rect = element.getBoundingClientRect();
+    const xr = element.width / element.clientWidth;
+    const yr = element.height / element.clientHeight;
+    let x = (e.clientX - rect.left) * xr;
+    let y = (e.clientY - rect.top) * yr;
+
+    if (0 <= x && x < (element.width * xr) && 0 <= y && y < (element.height * xr)) {
+      handler(x, y);
+    }
+  }
+
+  document.addEventListener('mouseup', mouseUp, false);
+}
+
 function mainLoop(ms) {
   requestAnimationFrame(mainLoop);
 
@@ -63,6 +80,15 @@ function initializeGame() {
   }
 
   requestAnimationFrame(mainLoop);
+
+  listenMouseClicks(canvas, function (mouseX, mouseY) {
+    const x = Math.floor(mouseX / squareWidth);
+    const y = Math.floor(mouseY / squareHeight);
+
+    if (x < xSquareCount && y < ySquareCount) {
+      blocks[x * ySquareCount + y] = BLOCK_NONE;
+    }
+  });
 }
 
 initializeGame();
