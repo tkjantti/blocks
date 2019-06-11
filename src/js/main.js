@@ -21,14 +21,22 @@ const BLOCK_GREEN = 3;
 
 class Grid {
   constructor(xCount, yCount) {
+    this.xCount = xCount;
+    this.yCount = yCount;
     this.blocks = [xCount * yCount];
   }
 
   getBlock(x, y) {
+    if (x < 0 || this.xCount <= x || y < 0 || this.yCount <= y) {
+      return BLOCK_NONE;
+    }
     return this.blocks[x * ySquareCount + y];
   }
 
   setBlock(x, y, type) {
+    if (x < 0 || this.xCount <= x || y < 0 || this.yCount <= y) {
+      return;
+    }
     this.blocks[x * ySquareCount + y] = type;
   }
 }
@@ -56,6 +64,71 @@ function drawGrid() {
       ctx.fillRect(x * squareWidth, y * squareHeight, squareWidth, squareHeight);
     }
   }
+}
+
+function ccb_up(x, y, color) {
+  y = y - 1;
+  const current = grid.getBlock(x, y);
+  if (current !== color) {
+    return;
+  }
+
+  grid.setBlock(x, y, BLOCK_NONE);
+  ccb_left(x, y, color);
+  ccb_up(x, y, color);
+  ccb_right(x, y, color);
+}
+
+function ccb_right(x, y, color) {
+  x = x + 1;
+  const current = grid.getBlock(x, y);
+  if (current !== color) {
+    return;
+  }
+
+  grid.setBlock(x, y, BLOCK_NONE);
+  ccb_up(x, y, color);
+  ccb_right(x, y, color);
+  ccb_down(x, y, color);
+}
+
+function ccb_left(x, y, color) {
+  x = x - 1;
+  const current = grid.getBlock(x, y);
+  if (current !== color) {
+    return;
+  }
+
+  grid.setBlock(x, y, BLOCK_NONE);
+  ccb_down(x, y, color);
+  ccb_left(x, y, color);
+  ccb_up(x, y, color);
+}
+
+function ccb_down(x, y, color) {
+  y = y + 1;
+  const current = grid.getBlock(x, y);
+  if (current !== color) {
+    return;
+  }
+
+  grid.setBlock(x, y, BLOCK_NONE);
+  ccb_right(x, y, color);
+  ccb_down(x, y, color);
+  ccb_left(x, y, color);
+}
+
+function clearContiguousBlocks(x, y) {
+  const color = grid.getBlock(x, y);
+  if (color === BLOCK_NONE) {
+    return;
+  }
+
+  grid.setBlock(x, y, BLOCK_NONE);
+  ccb_up(x, y, color);
+  ccb_right(x, y, color);
+  ccb_down(x, y, color);
+  ccb_left(x, y, color);
 }
 
 function listenMouseClicks(element, handler) {
@@ -98,9 +171,7 @@ function initializeGame() {
     const x = Math.floor(mouseX / squareWidth);
     const y = Math.floor(mouseY / squareHeight);
 
-    if (x < xSquareCount && y < ySquareCount) {
-      grid.setBlock(x, y, BLOCK_NONE);
-    }
+    clearContiguousBlocks(x, y);
   });
 }
 
