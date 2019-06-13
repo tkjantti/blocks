@@ -131,6 +131,60 @@ function clearContiguousBlocks(x, y) {
   ccb_left(x, y, color);
 }
 
+function shiftColumnDown(x, yStart) {
+  for (let y = yStart; y >= 0; y--) {
+    const above = grid.getBlock(x, y);
+    grid.setBlock(x, y + 1, above);
+  }
+  grid.setBlock(x, 0, BLOCK_NONE);
+}
+
+function shiftBlocksDown() {
+  for (let x = 0; x < xSquareCount; x++) {
+    for (let y = ySquareCount - 1; y > 0; y--) {
+      let count = 0;
+
+      while (grid.getBlock(x, y) === BLOCK_NONE && count < ySquareCount) {
+        shiftColumnDown(x, y - 1);
+        count++;
+      }
+    }
+  }
+}
+
+function isColumnEmpty(x) {
+  for (let y = ySquareCount - 1; y >= 0; y--) {
+    if (grid.getBlock(x, y) !== BLOCK_NONE) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function shiftColumnsLeft(xStart) {
+  for (let x = xStart; x < xSquareCount; x++) {
+    for (let y = ySquareCount - 1; y >= 0; y--) {
+      const block = grid.getBlock(x, y);
+      grid.setBlock(x - 1, y, block);
+    }
+  }
+
+  for (let y = ySquareCount - 1; y >= 0; y--) {
+    grid.setBlock(xSquareCount - 1, y, BLOCK_NONE);
+  }
+}
+
+function shiftBlocksLeft() {
+  for (let x = 0; x < xSquareCount - 1; x++) {
+    let count = 0;
+    while (isColumnEmpty(x) && count < xSquareCount) {
+      shiftColumnsLeft(x + 1);
+      count++;
+    }
+  }
+}
+
 function listenMouseClicks(element, handler) {
   function mouseUp(e) {
     const rect = element.getBoundingClientRect();
@@ -172,6 +226,8 @@ function initializeGame() {
     const y = Math.floor(mouseY / squareHeight);
 
     clearContiguousBlocks(x, y);
+    shiftBlocksDown();
+    shiftBlocksLeft();
   });
 }
 
