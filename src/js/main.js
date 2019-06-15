@@ -14,8 +14,8 @@ let lastTimeStampMs = 0;
 
 const grid = new Grid(xSquareCount, ySquareCount, BLOCK_NONE);
 
-function mainLoop(ms) {
-  requestAnimationFrame(mainLoop);
+function gameLoop(ms) {
+  requestAnimationFrame(gameLoop);
 
   deltaTimeMs = Math.min(ms - lastTimeStampMs, MAX_FRAME);
   lastTimeStampMs = ms;
@@ -27,8 +27,6 @@ function initializeGame() {
   const blockTypes = [BLOCK_RED, BLOCK_YELLOW, BLOCK_GREEN];
   grid.initialize(() => blockTypes[Math.floor(Math.random() * blockTypes.length)]);
 
-  requestAnimationFrame(mainLoop);
-
   listenMouseClicks(canvas, function (mouseX, mouseY) {
     const x = Math.floor(mouseX / squareWidth);
     const y = Math.floor(mouseY / squareHeight);
@@ -39,4 +37,9 @@ function initializeGame() {
   });
 }
 
-initializeGame();
+function main() {
+  initializeGame();
+  requestAnimationFrame(gameLoop);
+}
+
+main();
