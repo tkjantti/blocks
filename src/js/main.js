@@ -1,3 +1,4 @@
+import Array2D from "./Array2D.js";
 
 const TIME_STEP = 1000 / 60;
 const MAX_FRAME = TIME_STEP * 5;
@@ -19,29 +20,7 @@ const BLOCK_RED = 1;
 const BLOCK_YELLOW = 2;
 const BLOCK_GREEN = 3;
 
-class Grid {
-  constructor(xCount, yCount) {
-    this.xCount = xCount;
-    this.yCount = yCount;
-    this.blocks = [xCount * yCount];
-  }
-
-  getBlock(x, y) {
-    if (x < 0 || this.xCount <= x || y < 0 || this.yCount <= y) {
-      return BLOCK_NONE;
-    }
-    return this.blocks[x * ySquareCount + y];
-  }
-
-  setBlock(x, y, type) {
-    if (x < 0 || this.xCount <= x || y < 0 || this.yCount <= y) {
-      return;
-    }
-    this.blocks[x * ySquareCount + y] = type;
-  }
-}
-
-const grid = new Grid(xSquareCount, ySquareCount);
+const array = new Array2D(xSquareCount, ySquareCount, BLOCK_NONE);
 
 function getColor(block, x, y) {
   switch (block) {
@@ -59,7 +38,7 @@ function getColor(block, x, y) {
 function drawGrid() {
   for (let x = 0; x < xSquareCount; x++) {
     for (let y = 0; y < ySquareCount; y++) {
-      const block = grid.getBlock(x, y);
+      const block = array.getValue(x, y);
       ctx.fillStyle = getColor(block, x, y);
       ctx.fillRect(x * squareWidth, y * squareHeight, squareWidth, squareHeight);
     }
@@ -68,12 +47,12 @@ function drawGrid() {
 
 function ccb_up(x, y, color) {
   y = y - 1;
-  const current = grid.getBlock(x, y);
+  const current = array.getValue(x, y);
   if (current !== color) {
     return;
   }
 
-  grid.setBlock(x, y, BLOCK_NONE);
+  array.setValue(x, y, BLOCK_NONE);
   ccb_left(x, y, color);
   ccb_up(x, y, color);
   ccb_right(x, y, color);
@@ -81,12 +60,12 @@ function ccb_up(x, y, color) {
 
 function ccb_right(x, y, color) {
   x = x + 1;
-  const current = grid.getBlock(x, y);
+  const current = array.getValue(x, y);
   if (current !== color) {
     return;
   }
 
-  grid.setBlock(x, y, BLOCK_NONE);
+  array.setValue(x, y, BLOCK_NONE);
   ccb_up(x, y, color);
   ccb_right(x, y, color);
   ccb_down(x, y, color);
@@ -94,12 +73,12 @@ function ccb_right(x, y, color) {
 
 function ccb_left(x, y, color) {
   x = x - 1;
-  const current = grid.getBlock(x, y);
+  const current = array.getValue(x, y);
   if (current !== color) {
     return;
   }
 
-  grid.setBlock(x, y, BLOCK_NONE);
+  array.setValue(x, y, BLOCK_NONE);
   ccb_down(x, y, color);
   ccb_left(x, y, color);
   ccb_up(x, y, color);
@@ -107,24 +86,24 @@ function ccb_left(x, y, color) {
 
 function ccb_down(x, y, color) {
   y = y + 1;
-  const current = grid.getBlock(x, y);
+  const current = array.getValue(x, y);
   if (current !== color) {
     return;
   }
 
-  grid.setBlock(x, y, BLOCK_NONE);
+  array.setValue(x, y, BLOCK_NONE);
   ccb_right(x, y, color);
   ccb_down(x, y, color);
   ccb_left(x, y, color);
 }
 
 function clearContiguousBlocks(x, y) {
-  const color = grid.getBlock(x, y);
+  const color = array.getValue(x, y);
   if (color === BLOCK_NONE) {
     return;
   }
 
-  grid.setBlock(x, y, BLOCK_NONE);
+  array.setValue(x, y, BLOCK_NONE);
   ccb_up(x, y, color);
   ccb_right(x, y, color);
   ccb_down(x, y, color);
@@ -133,10 +112,10 @@ function clearContiguousBlocks(x, y) {
 
 function shiftColumnDown(x, yStart) {
   for (let y = yStart; y >= 0; y--) {
-    const above = grid.getBlock(x, y);
-    grid.setBlock(x, y + 1, above);
+    const above = array.getValue(x, y);
+    array.setValue(x, y + 1, above);
   }
-  grid.setBlock(x, 0, BLOCK_NONE);
+  array.setValue(x, 0, BLOCK_NONE);
 }
 
 function shiftBlocksDown() {
@@ -144,7 +123,7 @@ function shiftBlocksDown() {
     for (let y = ySquareCount - 1; y > 0; y--) {
       let count = 0;
 
-      while (grid.getBlock(x, y) === BLOCK_NONE && count < ySquareCount) {
+      while (array.getValue(x, y) === BLOCK_NONE && count < ySquareCount) {
         shiftColumnDown(x, y - 1);
         count++;
       }
@@ -154,7 +133,7 @@ function shiftBlocksDown() {
 
 function isColumnEmpty(x) {
   for (let y = ySquareCount - 1; y >= 0; y--) {
-    if (grid.getBlock(x, y) !== BLOCK_NONE) {
+    if (array.getValue(x, y) !== BLOCK_NONE) {
       return false;
     }
   }
@@ -165,13 +144,13 @@ function isColumnEmpty(x) {
 function shiftColumnsLeft(xStart) {
   for (let x = xStart; x < xSquareCount; x++) {
     for (let y = ySquareCount - 1; y >= 0; y--) {
-      const block = grid.getBlock(x, y);
-      grid.setBlock(x - 1, y, block);
+      const block = array.getValue(x, y);
+      array.setValue(x - 1, y, block);
     }
   }
 
   for (let y = ySquareCount - 1; y >= 0; y--) {
-    grid.setBlock(xSquareCount - 1, y, BLOCK_NONE);
+    array.setValue(xSquareCount - 1, y, BLOCK_NONE);
   }
 }
 
@@ -215,7 +194,7 @@ function initializeGame() {
 
   for (let x = 0; x < xSquareCount; x++) {
     for (let y = 0; y < ySquareCount; y++) {
-      grid.setBlock(x, y, blockTypes[Math.floor(Math.random() * blockTypes.length)]);
+      array.setValue(x, y, blockTypes[Math.floor(Math.random() * blockTypes.length)]);
     }
   }
 
