@@ -8,12 +8,8 @@ export const squareWidth = 64;
 export const squareHeight = 64;
 
 
-function getColor(block, x, y) {
-  if (!block) {
-    return `hsl(200, ${40 + ((x + y) % 2) * 30}%, 20%)`;
-  }
-
-  switch (block.type) {
+function getColor(blockType) {
+  switch (blockType) {
   case BLOCK_RED:
     return 'red';
   case BLOCK_YELLOW:
@@ -25,18 +21,29 @@ function getColor(block, x, y) {
   }
 }
 
+function drawBackground(array2D) {
+  for (let x = 0; x < array2D.xCount; x++) {
+    for (let y = 0; y < array2D.yCount; y++) {
+      ctx.fillStyle = `hsl(200, ${40 + ((x + y) % 2) * 30}%, 20%)`;
+      ctx.fillRect(x * squareWidth, y * squareHeight, squareWidth, squareHeight);
+    }
+  }
+}
+
 export function drawGrid(grid, dropRatio) {
   const array2D = grid.array;
+
+  drawBackground(array2D);
 
   for (let x = 0; x < array2D.xCount; x++) {
     for (let y = 0; y < array2D.yCount; y++) {
       const block = array2D.getValue(x, y);
-      let yShift = 0;
-      if (block && block.dropCount) {
-        yShift = dropRatio * squareHeight;
+
+      if (block) {
+        const yShift = Math.min(dropRatio, block.dropCount) * squareHeight;
+        ctx.fillStyle = getColor(block.type);
+        ctx.fillRect(x * squareWidth, y * squareHeight + yShift, squareWidth, squareHeight);
       }
-      ctx.fillStyle = getColor(block, x, y);
-      ctx.fillRect(x * squareWidth, y * squareHeight + yShift, squareWidth, squareHeight);
     }
   }
 }

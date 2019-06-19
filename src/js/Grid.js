@@ -89,17 +89,22 @@ export default class Grid {
   }
 
   shiftBlocksDown() {
+    let topDropCount = 0;
+
     for (let x = 0; x < this.array.xCount; x++) {
       let emptyBlocksBelowCount = 0;
-      for (let y = this.array.yCount - 1; y > 0; y--) {
+      for (let y = this.array.yCount - 1; y >= 0; y--) {
         const block = this.array.getValue(x, y);
         if (block) {
           block.dropCount = emptyBlocksBelowCount;
+          topDropCount = Math.max(topDropCount, emptyBlocksBelowCount);
         } else {
           emptyBlocksBelowCount++;
         }
       }
     }
+
+    return topDropCount;
   }
 
   shiftBlocksLeft() {
@@ -131,6 +136,26 @@ export default class Grid {
       while (isColumnEmpty(x) && count < this.array.xCount) {
         shiftColumnsLeft(x + 1);
         count++;
+      }
+    }
+  }
+
+  resetBlockPositions() {
+    for (let x = 0; x < this.array.xCount; x++) {
+      for (let y = this.array.yCount - 1; y >= 0; y--) {
+        let block = this.array.getValue(x, y);
+
+        if (block && block.dropCount) {
+          if (y + block.dropCount >= this.array.yCount) {
+            // Shouldn't happen
+            console.warn('DROPCOUNT OVERFLOW!');
+            continue;
+          }
+
+          this.array.setValue(x, y, null);
+          this.array.setValue(x, y + block.dropCount, block);
+          block.dropCount = 0;
+        }
       }
     }
   }

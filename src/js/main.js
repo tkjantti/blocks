@@ -14,7 +14,19 @@ let lastTimeStampMs = 0;
 
 const grid = new Grid(xSquareCount, ySquareCount, BLOCK_NONE);
 
-let droppingTime = 0;
+let dropTimeElapsed = 0;
+let topDropCount = 0;
+
+function animateBlocks(deltaTimeMs) {
+  dropTimeElapsed += deltaTimeMs;
+  const dropRatio = dropTimeElapsed / 1000;
+  if (dropRatio >= topDropCount) {
+    dropTimeElapsed = 0;
+    topDropCount = 0;
+    grid.resetBlockPositions();
+  }
+  return dropRatio;
+}
 
 function gameLoop(ms) {
   requestAnimationFrame(gameLoop);
@@ -22,11 +34,7 @@ function gameLoop(ms) {
   deltaTimeMs = Math.min(ms - lastTimeStampMs, MAX_FRAME);
   lastTimeStampMs = ms;
 
-  droppingTime += deltaTimeMs;
-  let dropRatio = droppingTime / 1000;
-  if (dropRatio >= 1) {
-    droppingTime = 0;
-  }
+  const dropRatio = animateBlocks(deltaTimeMs);
 
   drawGrid(grid, dropRatio);
 }
@@ -36,12 +44,16 @@ function initializeGame() {
   grid.initialize(() => blockTypes[Math.floor(Math.random() * blockTypes.length)]);
 
   listenMouseClicks(canvas, function (mouseX, mouseY) {
+    if (topDropCount > 0) {
+      return;
+    }
+
     const x = Math.floor(mouseX / squareWidth);
     const y = Math.floor(mouseY / squareHeight);
 
     grid.clearContiguousBlocks(x, y);
-    grid.shiftBlocksDown();
-    grid.shiftBlocksLeft();
+    topDropCount = grid.shiftBlocksDown();
+//    grid.shiftBlocksLeft();
   });
 }
 
