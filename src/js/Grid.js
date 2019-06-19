@@ -89,21 +89,14 @@ export default class Grid {
   }
 
   shiftBlocksDown() {
-    const shiftColumnDown = (x, yStart) => {
-      for (let y = yStart; y >= 0; y--) {
-        const above = this.array.getValue(x, y);
-        this.array.setValue(x, y + 1, above);
-      }
-      this.array.setValue(x, 0, null);
-    };
-
     for (let x = 0; x < this.array.xCount; x++) {
+      let emptyBlocksBelowCount = 0;
       for (let y = this.array.yCount - 1; y > 0; y--) {
-        let count = 0;
-
-        while (this.array.getValue(x, y) === null && count < this.array.yCount) {
-          shiftColumnDown(x, y - 1);
-          count++;
+        const block = this.array.getValue(x, y);
+        if (block) {
+          block.dropCount = emptyBlocksBelowCount;
+        } else {
+          emptyBlocksBelowCount++;
         }
       }
     }

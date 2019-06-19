@@ -25,14 +25,18 @@ function getColor(block, x, y) {
   }
 }
 
-export function drawGrid(grid) {
+export function drawGrid(grid, dropRatio) {
   const array2D = grid.array;
 
   for (let x = 0; x < array2D.xCount; x++) {
     for (let y = 0; y < array2D.yCount; y++) {
       const block = array2D.getValue(x, y);
+      let yShift = 0;
+      if (block && block.dropCount) {
+        yShift = dropRatio * squareHeight;
+      }
       ctx.fillStyle = getColor(block, x, y);
-      ctx.fillRect(x * squareWidth, y * squareHeight, squareWidth, squareHeight);
+      ctx.fillRect(x * squareWidth, y * squareHeight + yShift, squareWidth, squareHeight);
     }
   }
 }

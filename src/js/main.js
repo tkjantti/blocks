@@ -14,13 +14,21 @@ let lastTimeStampMs = 0;
 
 const grid = new Grid(xSquareCount, ySquareCount, BLOCK_NONE);
 
+let droppingTime = 0;
+
 function gameLoop(ms) {
   requestAnimationFrame(gameLoop);
 
   deltaTimeMs = Math.min(ms - lastTimeStampMs, MAX_FRAME);
   lastTimeStampMs = ms;
 
-  drawGrid(grid);
+  droppingTime += deltaTimeMs;
+  let dropRatio = droppingTime / 1000;
+  if (dropRatio >= 1) {
+    droppingTime = 0;
+  }
+
+  drawGrid(grid, dropRatio);
 }
 
 function initializeGame() {
