@@ -9,7 +9,11 @@ export const squareHeight = 64;
 
 
 function getColor(block, x, y) {
-  switch (block) {
+  if (!block) {
+    return `hsl(200, ${40 + ((x + y) % 2) * 30}%, 20%)`;
+  }
+
+  switch (block.type) {
   case BLOCK_RED:
     return 'red';
   case BLOCK_YELLOW:
@@ -17,7 +21,7 @@ function getColor(block, x, y) {
   case BLOCK_GREEN:
     return 'green';
   default:
-    return `hsl(200, ${40 + ((x + y) % 2) * 30}%, 20%)`;
+    return 'black';
   }
 }
 
