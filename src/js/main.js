@@ -6,6 +6,8 @@ import { BLOCK_NONE, BLOCK_RED, BLOCK_YELLOW, BLOCK_GREEN } from "./Block.js";
 const TIME_STEP = 1000 / 60;
 const MAX_FRAME = TIME_STEP * 5;
 
+const ANIM_SPEED = 100;
+
 const xSquareCount = Math.floor(canvas.width / squareWidth);
 const ySquareCount = Math.floor(canvas.height / squareHeight);
 
@@ -17,23 +19,42 @@ const grid = new Grid(xSquareCount, ySquareCount, BLOCK_NONE);
 let dropTimeElapsed = 0;
 let topDropCount = 0;
 
+let shiftLeftTimeElapsed = 0;
+let topShiftLeftCount = 0;
+
 function animateBlocks(deltaTimeMs) {
+  let animState = {
+    shiftDownRatio: 0,
+    shiftLeftRatio: 0,
+  };
+
   if (topDropCount > 0) {
     dropTimeElapsed += deltaTimeMs;
-    const dropRatio = dropTimeElapsed / 1000;
+    const dropRatio = dropTimeElapsed / ANIM_SPEED;
 
     if (dropRatio >= topDropCount) {
       dropTimeElapsed = 0;
       topDropCount = 0;
-      grid.resetBlockPositions();
+      grid.resetVerticalPositions();
 
-      grid.shiftBlocksLeft();
+      topShiftLeftCount = grid.shiftBlocksLeft();
     }
 
-    return dropRatio;
+    animState.shiftDownRatio = dropRatio;
+  } else if (topShiftLeftCount > 0) {
+    shiftLeftTimeElapsed += deltaTimeMs;
+    const shiftLeftRatio = shiftLeftTimeElapsed / ANIM_SPEED;
+
+    if (shiftLeftRatio >= topShiftLeftCount) {
+      shiftLeftTimeElapsed = 0;
+      topShiftLeftCount = 0;
+      // grid.resetHorizontalPositions();
+    }
+
+    animState.shiftLeftRatio = shiftLeftRatio;
   }
 
-  return 0;
+  return animState;
 }
 
 function gameLoop(ms) {
@@ -42,9 +63,9 @@ function gameLoop(ms) {
   deltaTimeMs = Math.min(ms - lastTimeStampMs, MAX_FRAME);
   lastTimeStampMs = ms;
 
-  const dropRatio = animateBlocks(deltaTimeMs);
+  const animState = animateBlocks(deltaTimeMs);
 
-  drawGrid(grid, dropRatio);
+  drawGrid(grid, animState);
 }
 
 function initializeGame() {

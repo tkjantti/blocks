@@ -7,7 +7,6 @@ const ctx = canvas.getContext("2d");
 export const squareWidth = 64;
 export const squareHeight = 64;
 
-
 function getColor(blockType) {
   switch (blockType) {
   case BLOCK_RED:
@@ -30,7 +29,7 @@ function drawBackground(array2D) {
   }
 }
 
-export function drawGrid(grid, dropRatio) {
+export function drawGrid(grid, animState) {
   const array2D = grid.array;
 
   drawBackground(array2D);
@@ -40,9 +39,15 @@ export function drawGrid(grid, dropRatio) {
       const block = array2D.getValue(x, y);
 
       if (block) {
-        const yShift = Math.min(dropRatio, block.dropCount) * squareHeight;
+        const yShift = Math.min(animState.shiftDownRatio, block.dropCount) * squareHeight;
+        const xShift = Math.min(animState.shiftLeftRatio, block.stepsLeft) * squareWidth;
+
         ctx.fillStyle = getColor(block.type);
-        ctx.fillRect(x * squareWidth, y * squareHeight + yShift, squareWidth, squareHeight);
+        ctx.fillRect(
+          x * squareWidth - xShift,
+          y * squareHeight + yShift,
+          squareWidth,
+          squareHeight);
       }
     }
   }

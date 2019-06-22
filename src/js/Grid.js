@@ -11,6 +11,7 @@ export default class Grid {
         this.array.setValue(x, y, {
           type: getInitialBlockType(),
           dropCount: 0,
+          stepsLeft: 0,
         });
       }
     }
@@ -108,39 +109,33 @@ export default class Grid {
   }
 
   shiftBlocksLeft() {
-    const isColumnEmpty = (x) => {
+    let emptyColumnCount = 0;
+    let topShiftLeftCount = 0;
+
+    for (let x = 0; x < this.array.xCount; x++) {
+      let allEmpty = true;
+
       for (let y = this.array.yCount - 1; y >= 0; y--) {
-        if (this.array.getValue(x, y) !== null) {
-          return false;
+        let block = this.array.getValue(x, y);
+        if (block) {
+          allEmpty = false;
+          if (emptyColumnCount > 0) {
+            block.stepsLeft = emptyColumnCount;
+          }
         }
       }
 
-      return true;
-    };
-
-    const shiftColumnsLeft = (xStart) => {
-      for (let x = xStart; x < this.array.xCount; x++) {
-        for (let y = this.array.yCount - 1; y >= 0; y--) {
-          const block = this.array.getValue(x, y);
-          this.array.setValue(x - 1, y, block);
-        }
-      }
-
-      for (let y = this.array.yCount - 1; y >= 0; y--) {
-        this.array.setValue(this.array.xCount - 1, y, null);
-      }
-    };
-
-    for (let x = 0; x < this.array.xCount - 1; x++) {
-      let count = 0;
-      while (isColumnEmpty(x) && count < this.array.xCount) {
-        shiftColumnsLeft(x + 1);
-        count++;
+      if (allEmpty) {
+        emptyColumnCount++;
+      } else {
+        topShiftLeftCount = emptyColumnCount;
       }
     }
+
+    return topShiftLeftCount;
   }
 
-  resetBlockPositions() {
+  resetVerticalPositions() {
     for (let x = 0; x < this.array.xCount; x++) {
       for (let y = this.array.yCount - 1; y >= 0; y--) {
         let block = this.array.getValue(x, y);
@@ -148,7 +143,7 @@ export default class Grid {
         if (block && block.dropCount) {
           if (y + block.dropCount >= this.array.yCount) {
             // Shouldn't happen
-            console.warn('DROPCOUNT OVERFLOW!');
+            console.warn('DROPCOUNT OVERFLOW!'); // jshint ignore:line
             continue;
           }
 
