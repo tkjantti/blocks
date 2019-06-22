@@ -18,14 +18,22 @@ let dropTimeElapsed = 0;
 let topDropCount = 0;
 
 function animateBlocks(deltaTimeMs) {
-  dropTimeElapsed += deltaTimeMs;
-  const dropRatio = dropTimeElapsed / 1000;
-  if (dropRatio >= topDropCount) {
-    dropTimeElapsed = 0;
-    topDropCount = 0;
-    grid.resetBlockPositions();
+  if (topDropCount > 0) {
+    dropTimeElapsed += deltaTimeMs;
+    const dropRatio = dropTimeElapsed / 1000;
+
+    if (dropRatio >= topDropCount) {
+      dropTimeElapsed = 0;
+      topDropCount = 0;
+      grid.resetBlockPositions();
+
+      grid.shiftBlocksLeft();
+    }
+
+    return dropRatio;
   }
-  return dropRatio;
+
+  return 0;
 }
 
 function gameLoop(ms) {
@@ -53,7 +61,6 @@ function initializeGame() {
 
     grid.clearContiguousBlocks(x, y);
     topDropCount = grid.shiftBlocksDown();
-//    grid.shiftBlocksLeft();
   });
 }
 
