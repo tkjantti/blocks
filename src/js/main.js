@@ -78,6 +78,10 @@ function initializeGame() {
     const x = Math.floor(mouseX / squareWidth);
     const y = Math.floor(mouseY / squareHeight);
 
+    if (!grid.isContiguousArea(x, y)) {
+      return;
+    }
+
     grid.clearContiguousBlocks(x, y);
 
     topShiftDownCount = grid.shiftBlocksDown();

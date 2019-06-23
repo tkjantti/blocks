@@ -17,6 +17,24 @@ export default class Grid {
     }
   }
 
+  isContiguousArea(x, y) {
+    const initial = this.array.getValue(x, y);
+    if (!initial) {
+      return false;
+    }
+
+    function sameType(block) {
+      return !!block && block.type === initial.type;
+    }
+
+    const top = this.array.getValue(x, y - 1);
+    const right = this.array.getValue(x + 1, y);
+    const down = this.array.getValue(x, y + 1);
+    const left = this.array.getValue(x - 1, y);
+
+    return sameType(top) || sameType(right) || sameType(down) || sameType(left);
+  }
+
   /*
    * Clears contiguous blocks of the same color.
    */
