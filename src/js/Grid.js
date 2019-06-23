@@ -10,7 +10,7 @@ export default class Grid {
       for (let y = 0; y < this.array.yCount; y++) {
         this.array.setValue(x, y, {
           type: getInitialBlockType(),
-          dropCount: 0,
+          stepsDown: 0,
           stepsLeft: 0,
         });
       }
@@ -97,7 +97,7 @@ export default class Grid {
       for (let y = this.array.yCount - 1; y >= 0; y--) {
         const block = this.array.getValue(x, y);
         if (block) {
-          block.dropCount = emptyBlocksBelowCount;
+          block.stepsDown = emptyBlocksBelowCount;
           topDropCount = Math.max(topDropCount, emptyBlocksBelowCount);
         } else {
           emptyBlocksBelowCount++;
@@ -140,16 +140,15 @@ export default class Grid {
       for (let y = this.array.yCount - 1; y >= 0; y--) {
         let block = this.array.getValue(x, y);
 
-        if (block && block.dropCount) {
-          if (y + block.dropCount >= this.array.yCount) {
+        if (block && block.stepsDown) {
+          if (y + block.stepsDown >= this.array.yCount) {
             // Shouldn't happen
-            console.warn('DROPCOUNT OVERFLOW!'); // jshint ignore:line
             continue;
           }
 
           this.array.setValue(x, y, null);
-          this.array.setValue(x, y + block.dropCount, block);
-          block.dropCount = 0;
+          this.array.setValue(x, y + block.stepsDown, block);
+          block.stepsDown = 0;
         }
       }
     }
