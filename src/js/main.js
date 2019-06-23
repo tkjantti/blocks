@@ -1,6 +1,7 @@
 import Grid from "./Grid.js";
 import { squareWidth, squareHeight, canvas, drawGrid } from "./Graphics.js";
 import { listenMouseClicks } from "./Controls.js";
+import AnimationState from "./AnimationState.js";
 import { BLOCK_NONE, BLOCK_RED, BLOCK_YELLOW, BLOCK_GREEN } from "./Block.js";
 
 const TIME_STEP = 1000 / 60;
@@ -22,12 +23,9 @@ let topShiftDownCount = 0;
 let shiftLeftTimeElapsed = 0;
 let topShiftLeftCount = 0;
 
-function animateBlocks(deltaTimeMs) {
-  let animState = {
-    shiftDownRatio: 0,
-    shiftLeftRatio: 0,
-  };
+let animState = new AnimationState();
 
+function animateBlocks(deltaTimeMs) {
   if (topShiftDownCount > 0) {
     shiftDownTimeElapsed += deltaTimeMs;
     const shiftDownRatio = shiftDownTimeElapsed / ANIM_SPEED;
@@ -63,7 +61,7 @@ function gameLoop(ms) {
   deltaTimeMs = Math.min(ms - lastTimeStampMs, MAX_FRAME);
   lastTimeStampMs = ms;
 
-  const animState = animateBlocks(deltaTimeMs);
+  animateBlocks(deltaTimeMs);
 
   drawGrid(grid, animState);
 }
@@ -81,6 +79,7 @@ function initializeGame() {
     const y = Math.floor(mouseY / squareHeight);
 
     grid.clearContiguousBlocks(x, y);
+
     topShiftDownCount = grid.shiftBlocksDown();
     if (topShiftDownCount === 0) {
       // No need to animate dropping down, start shift left animation immediately.
