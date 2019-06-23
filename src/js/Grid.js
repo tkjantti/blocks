@@ -1,15 +1,18 @@
 import Array2D from "./Array2D.js";
 
 export default class Grid {
-  constructor(xSquareCount, ySquareCount, defaultValue) {
-    this.array = new Array2D(xSquareCount, ySquareCount, defaultValue);
-    this.defaultValue = defaultValue;
+  constructor(xSquareCount, ySquareCount) {
+    this.array = new Array2D(xSquareCount, ySquareCount);
   }
 
-  initialize(getInitialValue) {
+  initialize(getInitialBlockType) {
     for (let x = 0; x < this.array.xCount; x++) {
       for (let y = 0; y < this.array.yCount; y++) {
-        this.array.setValue(x, y, getInitialValue());
+        this.array.setValue(x, y, {
+          type: getInitialBlockType(),
+          stepsDown: 0,
+          stepsLeft: 0,
+        });
       }
     }
   }
@@ -18,124 +21,149 @@ export default class Grid {
    * Clears contiguous blocks of the same color.
    */
   clearContiguousBlocks(x, y) {
-    const clearUp = (x, y, value) => {
+    const clearUp = (x, y, type) => {
       y = y - 1;
       const current = this.array.getValue(x, y);
-      if (current !== value) {
+      if (!current || current.type !== type) {
         return;
       }
 
-      this.array.setValue(x, y, this.defaultValue);
-      clearLeft(x, y, value);
-      clearUp(x, y, value);
-      clearRight(x, y, value);
+      this.array.setValue(x, y, null);
+      clearLeft(x, y, type);
+      clearUp(x, y, type);
+      clearRight(x, y, type);
     };
 
-    const clearRight = (x, y, value) => {
+    const clearRight = (x, y, type) => {
       x = x + 1;
       const current = this.array.getValue(x, y);
-      if (current !== value) {
+      if (!current || current.type !== type) {
         return;
       }
 
-      this.array.setValue(x, y, this.defaultValue);
-      clearUp(x, y, value);
-      clearRight(x, y, value);
-      clearDown(x, y, value);
+      this.array.setValue(x, y, null);
+      clearUp(x, y, type);
+      clearRight(x, y, type);
+      clearDown(x, y, type);
     };
 
-    const clearLeft = (x, y, value) => {
+    const clearLeft = (x, y, type) => {
       x = x - 1;
       const current = this.array.getValue(x, y);
-      if (current !== value) {
+      if (!current || current.type !== type) {
         return;
       }
 
-      this.array.setValue(x, y, this.defaultValue);
-      clearDown(x, y, value);
-      clearLeft(x, y, value);
-      clearUp(x, y, value);
+      this.array.setValue(x, y, null);
+      clearDown(x, y, type);
+      clearLeft(x, y, type);
+      clearUp(x, y, type);
     };
 
-    const clearDown = (x, y, value) => {
+    const clearDown = (x, y, type) => {
       y = y + 1;
       const current = this.array.getValue(x, y);
-      if (current !== value) {
+      if (!current || current.type !== type) {
         return;
       }
 
-      this.array.setValue(x, y, this.defaultValue);
-      clearRight(x, y, value);
-      clearDown(x, y, value);
-      clearLeft(x, y, value);
+      this.array.setValue(x, y, null);
+      clearRight(x, y, type);
+      clearDown(x, y, type);
+      clearLeft(x, y, type);
     };
 
 
-    const value = this.array.getValue(x, y);
-    if (value === this.defaultValue) {
+    const initial = this.array.getValue(x, y);
+    if (!initial) {
       return;
     }
 
-    // Clear the initial value
-    this.array.setValue(x, y, this.defaultValue);
+    // Clear the initial block
+    this.array.setValue(x, y, null);
 
     // Clear recursively in all directions
-    clearUp(x, y, value);
-    clearRight(x, y, value);
-    clearDown(x, y, value);
-    clearLeft(x, y, value);
+    clearUp(x, y, initial.type);
+    clearRight(x, y, initial.type);
+    clearDown(x, y, initial.type);
+    clearLeft(x, y, initial.type);
   }
 
   shiftBlocksDown() {
-    const shiftColumnDown = (x, yStart) => {
-      for (let y = yStart; y >= 0; y--) {
-        const above = this.array.getValue(x, y);
-        this.array.setValue(x, y + 1, above);
-      }
-      this.array.setValue(x, 0, this.defaultValue);
-    };
+    let topShiftDownCount = 0;
 
     for (let x = 0; x < this.array.xCount; x++) {
-      for (let y = this.array.yCount - 1; y > 0; y--) {
-        let count = 0;
+      let emptyBlocksBelowCount = 0;
+      for (let y = this.array.yCount - 1; y >= 0; y--) {
+        const block = this.array.getValue(x, y);
+        if (block) {
+          block.stepsDown = emptyBlocksBelowCount;
+          topShiftDownCount = Math.max(topShiftDownCount, emptyBlocksBelowCount);
+        } else {
+          emptyBlocksBelowCount++;
+        }
+      }
+    }
 
-        while (this.array.getValue(x, y) === this.defaultValue && count < this.array.yCount) {
-          shiftColumnDown(x, y - 1);
-          count++;
+    return topShiftDownCount;
+  }
+
+  shiftBlocksLeft() {
+    let emptyColumnCount = 0;
+    let topShiftLeftCount = 0;
+
+    for (let x = 0; x < this.array.xCount; x++) {
+      let allEmpty = true;
+
+      for (let y = this.array.yCount - 1; y >= 0; y--) {
+        let block = this.array.getValue(x, y);
+        if (block) {
+          allEmpty = false;
+          if (emptyColumnCount > 0) {
+            block.stepsLeft = emptyColumnCount;
+          }
+        }
+      }
+
+      if (allEmpty) {
+        emptyColumnCount++;
+      } else {
+        topShiftLeftCount = emptyColumnCount;
+      }
+    }
+
+    return topShiftLeftCount;
+  }
+
+  resetVerticalPositions() {
+    for (let x = 0; x < this.array.xCount; x++) {
+      for (let y = this.array.yCount - 1; y >= 0; y--) {
+        let block = this.array.getValue(x, y);
+
+        if (block && block.stepsDown) {
+          if (y + block.stepsDown >= this.array.yCount) {
+            // Shouldn't happen
+            continue;
+          }
+
+          this.array.setValue(x, y, null);
+          this.array.setValue(x, y + block.stepsDown, block);
+          block.stepsDown = 0;
         }
       }
     }
   }
 
-  shiftBlocksLeft() {
-    const isColumnEmpty = (x) => {
+  resetHorizontalPositions() {
+    for (let x = 0; x < this.array.xCount; x++) {
       for (let y = this.array.yCount - 1; y >= 0; y--) {
-        if (this.array.getValue(x, y) !== this.defaultValue) {
-          return false;
+        let block = this.array.getValue(x, y);
+
+        if (block && block.stepsLeft) {
+          this.array.setValue(x, y, null);
+          this.array.setValue(x - block.stepsLeft, y, block);
+          block.stepsLeft = 0;
         }
-      }
-
-      return true;
-    };
-
-    const shiftColumnsLeft = (xStart) => {
-      for (let x = xStart; x < this.array.xCount; x++) {
-        for (let y = this.array.yCount - 1; y >= 0; y--) {
-          const block = this.array.getValue(x, y);
-          this.array.setValue(x - 1, y, block);
-        }
-      }
-
-      for (let y = this.array.yCount - 1; y >= 0; y--) {
-        this.array.setValue(this.array.xCount - 1, y, this.defaultValue);
-      }
-    };
-
-    for (let x = 0; x < this.array.xCount - 1; x++) {
-      let count = 0;
-      while (isColumnEmpty(x) && count < this.array.xCount) {
-        shiftColumnsLeft(x + 1);
-        count++;
       }
     }
   }
