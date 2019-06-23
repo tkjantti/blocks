@@ -90,7 +90,7 @@ export default class Grid {
   }
 
   shiftBlocksDown() {
-    let topDropCount = 0;
+    let topShiftDownCount = 0;
 
     for (let x = 0; x < this.array.xCount; x++) {
       let emptyBlocksBelowCount = 0;
@@ -98,14 +98,14 @@ export default class Grid {
         const block = this.array.getValue(x, y);
         if (block) {
           block.stepsDown = emptyBlocksBelowCount;
-          topDropCount = Math.max(topDropCount, emptyBlocksBelowCount);
+          topShiftDownCount = Math.max(topShiftDownCount, emptyBlocksBelowCount);
         } else {
           emptyBlocksBelowCount++;
         }
       }
     }
 
-    return topDropCount;
+    return topShiftDownCount;
   }
 
   shiftBlocksLeft() {

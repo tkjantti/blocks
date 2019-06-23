@@ -16,8 +16,8 @@ let lastTimeStampMs = 0;
 
 const grid = new Grid(xSquareCount, ySquareCount, BLOCK_NONE);
 
-let dropTimeElapsed = 0;
-let topDropCount = 0;
+let shiftDownTimeElapsed = 0;
+let topShiftDownCount = 0;
 
 let shiftLeftTimeElapsed = 0;
 let topShiftLeftCount = 0;
@@ -28,19 +28,19 @@ function animateBlocks(deltaTimeMs) {
     shiftLeftRatio: 0,
   };
 
-  if (topDropCount > 0) {
-    dropTimeElapsed += deltaTimeMs;
-    const dropRatio = dropTimeElapsed / ANIM_SPEED;
+  if (topShiftDownCount > 0) {
+    shiftDownTimeElapsed += deltaTimeMs;
+    const shiftDownRatio = shiftDownTimeElapsed / ANIM_SPEED;
 
-    if (dropRatio >= topDropCount) {
-      dropTimeElapsed = 0;
-      topDropCount = 0;
+    if (shiftDownRatio >= topShiftDownCount) {
+      shiftDownTimeElapsed = 0;
+      topShiftDownCount = 0;
       grid.resetVerticalPositions();
 
       topShiftLeftCount = grid.shiftBlocksLeft();
     }
 
-    animState.shiftDownRatio = dropRatio;
+    animState.shiftDownRatio = shiftDownRatio;
   } else if (topShiftLeftCount > 0) {
     shiftLeftTimeElapsed += deltaTimeMs;
     const shiftLeftRatio = shiftLeftTimeElapsed / ANIM_SPEED;
@@ -73,7 +73,7 @@ function initializeGame() {
   grid.initialize(() => blockTypes[Math.floor(Math.random() * blockTypes.length)]);
 
   listenMouseClicks(canvas, function (mouseX, mouseY) {
-    if (topDropCount > 0 || topShiftLeftCount > 0) {
+    if (topShiftDownCount > 0 || topShiftLeftCount > 0) {
       return;
     }
 
@@ -81,8 +81,8 @@ function initializeGame() {
     const y = Math.floor(mouseY / squareHeight);
 
     grid.clearContiguousBlocks(x, y);
-    topDropCount = grid.shiftBlocksDown();
-    if (topDropCount === 0) {
+    topShiftDownCount = grid.shiftBlocksDown();
+    if (topShiftDownCount === 0) {
       // No need to animate dropping down, start shift left animation immediately.
       topShiftLeftCount = grid.shiftBlocksLeft();
     }
