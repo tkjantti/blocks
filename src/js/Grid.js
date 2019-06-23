@@ -154,4 +154,18 @@ export default class Grid {
       }
     }
   }
+
+  resetHorizontalPositions() {
+    for (let x = 0; x < this.array.xCount; x++) {
+      for (let y = this.array.yCount - 1; y >= 0; y--) {
+        let block = this.array.getValue(x, y);
+
+        if (block && block.stepsLeft) {
+          this.array.setValue(x, y, null);
+          this.array.setValue(x - block.stepsLeft, y, block);
+          block.stepsLeft = 0;
+        }
+      }
+    }
+  }
 }

@@ -48,7 +48,7 @@ function animateBlocks(deltaTimeMs) {
     if (shiftLeftRatio >= topShiftLeftCount) {
       shiftLeftTimeElapsed = 0;
       topShiftLeftCount = 0;
-      // grid.resetHorizontalPositions();
+      grid.resetHorizontalPositions();
     }
 
     animState.shiftLeftRatio = shiftLeftRatio;
@@ -73,7 +73,7 @@ function initializeGame() {
   grid.initialize(() => blockTypes[Math.floor(Math.random() * blockTypes.length)]);
 
   listenMouseClicks(canvas, function (mouseX, mouseY) {
-    if (topDropCount > 0) {
+    if (topDropCount > 0 || topShiftLeftCount > 0) {
       return;
     }
 
@@ -82,6 +82,10 @@ function initializeGame() {
 
     grid.clearContiguousBlocks(x, y);
     topDropCount = grid.shiftBlocksDown();
+    if (topDropCount === 0) {
+      // No need to animate dropping down, start shift left animation immediately.
+      topShiftLeftCount = grid.shiftBlocksLeft();
+    }
   });
 }
 
