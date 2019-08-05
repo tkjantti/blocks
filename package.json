@@ -4,15 +4,20 @@
   "description": "A game of blocks",
   "private": true,
   "scripts": {
-    "start": "budo src/js/main.js:bundle.js --dir src/ --live -- -t [ babelify --presets [ @babel/preset-env ] ]"
+    "start": "webpack-dev-server",
+    "build": "webpack"
   },
-  "keywords": ["game", "blocks"],
+  "keywords": [
+    "game",
+    "blocks"
+  ],
   "author": "Tero Jäntti <tkjantti@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "@babel/core": "^7.4.3",
-    "@babel/preset-env": "^7.4.3",
-    "babelify": "^10.0.0",
-    "budo": "^11.6.2"
+    "clean-webpack-plugin": "^3.0.0",
+    "html-webpack-plugin": "^3.2.0",
+    "webpack": "^4.39.1",
+    "webpack-cli": "^3.3.6",
+    "webpack-dev-server": "^3.7.2"
   }
 }
