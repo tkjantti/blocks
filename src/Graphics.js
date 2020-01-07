@@ -86,7 +86,14 @@ export function drawGrid(grid, animState) {
 }
 
 export function drawScore(number) {
+  const text = number.toString();
+
   ctx.fillStyle = "blue";
   ctx.font = "40px Sans-serif";
-  ctx.fillText(number.toString(), 30, 50);
+
+  const textWidth = ctx.measureText(text).width;
+  const x = canvas.width - textWidth - 20;
+  const y = 50;
+
+  ctx.fillText(text, x, y);
 }
