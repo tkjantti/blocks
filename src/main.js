@@ -100,6 +100,10 @@ function gameLoop(ms) {
   drawScore(score);
 }
 
+function calculateScore(count) {
+  return count * count;
+}
+
 function initializeGame() {
   const blockTypes = [BLOCK_RED, BLOCK_YELLOW, BLOCK_GREEN];
   grid.initialize(
@@ -119,7 +123,7 @@ function initializeGame() {
     }
 
     const count = grid.clearContiguousBlocks(x, y);
-    score += count;
+    score += calculateScore(count);
 
     topShiftDownCount = grid.shiftBlocksDown();
     if (topShiftDownCount === 0) {
