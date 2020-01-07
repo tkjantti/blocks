@@ -84,3 +84,9 @@ export function drawGrid(grid, animState) {
     }
   }
 }
+
+export function drawScore(number) {
+  ctx.fillStyle = "blue";
+  ctx.font = "40px Sans-serif";
+  ctx.fillText(number.toString(), 30, 50);
+}
