@@ -61,73 +61,77 @@ export default class Grid {
 
   /*
    * Clears contiguous blocks of the same color.
+   * Returns the count of the blocks cleared.
    */
   clearContiguousBlocks(x, y) {
     const clearUp = (x, y, type) => {
       y = y - 1;
       const current = this.array.getValue(x, y);
       if (!current || current.type !== type) {
-        return;
+        return 0;
       }
-
       this.array.setValue(x, y, null);
-      clearLeft(x, y, type);
-      clearUp(x, y, type);
-      clearRight(x, y, type);
+      return (
+        1 + clearLeft(x, y, type) + clearUp(x, y, type) + clearRight(x, y, type)
+      );
     };
 
     const clearRight = (x, y, type) => {
       x = x + 1;
       const current = this.array.getValue(x, y);
       if (!current || current.type !== type) {
-        return;
+        return 0;
       }
-
       this.array.setValue(x, y, null);
-      clearUp(x, y, type);
-      clearRight(x, y, type);
-      clearDown(x, y, type);
+      return (
+        1 + clearUp(x, y, type) + clearRight(x, y, type) + clearDown(x, y, type)
+      );
     };
 
     const clearLeft = (x, y, type) => {
       x = x - 1;
       const current = this.array.getValue(x, y);
       if (!current || current.type !== type) {
-        return;
+        return 0;
       }
-
       this.array.setValue(x, y, null);
-      clearDown(x, y, type);
-      clearLeft(x, y, type);
-      clearUp(x, y, type);
+      return (
+        1 + clearDown(x, y, type) + clearLeft(x, y, type) + clearUp(x, y, type)
+      );
     };
 
     const clearDown = (x, y, type) => {
       y = y + 1;
       const current = this.array.getValue(x, y);
       if (!current || current.type !== type) {
-        return;
+        return 0;
       }
-
       this.array.setValue(x, y, null);
-      clearRight(x, y, type);
-      clearDown(x, y, type);
-      clearLeft(x, y, type);
+      return (
+        1 +
+        clearRight(x, y, type) +
+        clearDown(x, y, type) +
+        clearLeft(x, y, type)
+      );
     };
 
     const initial = this.array.getValue(x, y);
     if (!initial) {
-      return;
+      return 0;
     }
 
     // Clear the initial block
     this.array.setValue(x, y, null);
 
     // Clear recursively in all directions
-    clearUp(x, y, initial.type);
-    clearRight(x, y, initial.type);
-    clearDown(x, y, initial.type);
-    clearLeft(x, y, initial.type);
+    const count =
+      1 +
+      clearUp(x, y, initial.type) +
+      clearRight(x, y, initial.type) +
+      clearDown(x, y, initial.type) +
+      clearLeft(x, y, initial.type);
+
+    return count;
   }
 
   shiftBlocksDown() {

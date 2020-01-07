@@ -118,7 +118,8 @@ function initializeGame() {
       return;
     }
 
-    grid.clearContiguousBlocks(x, y);
+    const count = grid.clearContiguousBlocks(x, y);
+    score += count;
 
     topShiftDownCount = grid.shiftBlocksDown();
     if (topShiftDownCount === 0) {
