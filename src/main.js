@@ -23,7 +23,13 @@
  */
 
 import Grid from "./Grid.js";
-import { squareWidth, squareHeight, canvas, drawGrid } from "./Graphics.js";
+import {
+  squareWidth,
+  squareHeight,
+  canvas,
+  drawGrid,
+  drawScore
+} from "./Graphics.js";
 import { listenMouseClicks } from "./Controls.js";
 import AnimationState from "./AnimationState.js";
 import { BLOCK_NONE, BLOCK_RED, BLOCK_YELLOW, BLOCK_GREEN } from "./Block.js";
@@ -48,6 +54,8 @@ let shiftLeftTimeElapsed = 0;
 let topShiftLeftCount = 0;
 
 let animState = new AnimationState();
+
+let score = 0;
 
 function animateBlocks(deltaTimeMs) {
   if (topShiftDownCount > 0) {
@@ -88,6 +96,12 @@ function gameLoop(ms) {
   animateBlocks(deltaTimeMs);
 
   drawGrid(grid, animState);
+
+  drawScore(score);
+}
+
+function calculateScore(count) {
+  return count * count;
 }
 
 function initializeGame() {
@@ -108,7 +122,8 @@ function initializeGame() {
       return;
     }
 
-    grid.clearContiguousBlocks(x, y);
+    const count = grid.clearContiguousBlocks(x, y);
+    score += calculateScore(count);
 
     topShiftDownCount = grid.shiftBlocksDown();
     if (topShiftDownCount === 0) {

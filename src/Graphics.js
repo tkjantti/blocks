@@ -84,3 +84,22 @@ export function drawGrid(grid, animState) {
     }
   }
 }
+
+export function drawScore(number) {
+  const text = number.toString();
+
+  ctx.font = "40px Sans-serif";
+
+  const textWidth = ctx.measureText(text).width;
+  const textAreaWidth = 300;
+  const x = canvas.width - textWidth - 20;
+  const y = 50;
+
+  ctx.fillStyle = "lightblue";
+  ctx.globalAlpha = 0.1;
+  ctx.fillRect(canvas.width - textAreaWidth, 0, textAreaWidth, 70);
+
+  ctx.fillStyle = "blue";
+  ctx.globalAlpha = 1;
+  ctx.fillText(text, x, y);
+}
