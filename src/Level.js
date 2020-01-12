@@ -23,13 +23,7 @@
  */
 
 import Grid from "./Grid.js";
-import {
-  squareWidth,
-  squareHeight,
-  canvas,
-  drawGrid,
-  drawScore
-} from "./Graphics.js";
+import { squareWidth, squareHeight, canvas, drawGrid } from "./Graphics.js";
 import AnimationState from "./AnimationState.js";
 import { BLOCK_NONE, BLOCK_RED, BLOCK_YELLOW, BLOCK_GREEN } from "./Block.js";
 
@@ -49,8 +43,6 @@ export class Level {
     this.shiftLeftTimeElapsed = 0;
     this.shiftLeftCount = 0;
 
-    this.score = 0;
-
     const blockTypes = [BLOCK_RED, BLOCK_YELLOW, BLOCK_GREEN];
     this.grid.initialize(
       () => blockTypes[Math.floor(Math.random() * blockTypes.length)]
@@ -63,7 +55,6 @@ export class Level {
 
   draw() {
     drawGrid(this.grid, this.animState);
-    drawScore(this.score);
   }
 
   isFinished() {
@@ -72,20 +63,22 @@ export class Level {
 
   onClick(screenX, screenY) {
     if (this.isAnimating()) {
-      return;
+      return 0;
     }
 
     const x = Math.floor(screenX / squareWidth);
     const y = Math.floor(screenY / squareHeight);
 
     if (!this.grid.isContiguousArea(x, y)) {
-      return;
+      return 0;
     }
 
     const count = this.grid.clearContiguousBlocks(x, y);
-    this.score += this.calculateScore(count);
+    const score = this.calculateScore(count);
 
     this.startAnimation();
+
+    return score;
   }
 
   calculateScore(count) {

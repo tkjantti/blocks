@@ -24,12 +24,15 @@
 
 import { canvas } from "./Graphics.js";
 import { listenMouseClicks } from "./Controls.js";
+import { drawScore } from "./Graphics.js";
 import { Level } from "./Level.js";
 
 const TIME_STEP = 1000 / 60;
 const MAX_FRAME = TIME_STEP * 5;
 
 let lastTimeStampMs = 0;
+
+let score = 0;
 
 let level = new Level();
 
@@ -42,6 +45,7 @@ function gameLoop(ms) {
   level.update(deltaTimeMs);
 
   level.draw();
+  drawScore(score);
 
   if (level.isFinished()) {
     level = new Level();
@@ -49,9 +53,10 @@ function gameLoop(ms) {
 }
 
 function initializeGame() {
-  listenMouseClicks(canvas, (screenX, screenY) =>
-    level.onClick(screenX, screenY)
-  );
+  score = 0;
+  listenMouseClicks(canvas, (screenX, screenY) => {
+    score += level.onClick(screenX, screenY);
+  });
 }
 
 initializeGame();
