@@ -66,6 +66,10 @@ export class Level {
     drawScore(this.score);
   }
 
+  isFinished() {
+    return !(this.isAnimating() || this.grid.hasContiguousArea());
+  }
+
   onClick(screenX, screenY) {
     if (this.isAnimating()) {
       return;

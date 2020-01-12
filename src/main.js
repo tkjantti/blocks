@@ -29,24 +29,29 @@ import { Level } from "./Level.js";
 const TIME_STEP = 1000 / 60;
 const MAX_FRAME = TIME_STEP * 5;
 
-let deltaTimeMs = 0;
 let lastTimeStampMs = 0;
 
-const level = new Level();
+let level = new Level();
 
 function gameLoop(ms) {
   requestAnimationFrame(gameLoop);
 
-  deltaTimeMs = Math.min(ms - lastTimeStampMs, MAX_FRAME);
+  const deltaTimeMs = Math.min(ms - lastTimeStampMs, MAX_FRAME);
   lastTimeStampMs = ms;
 
   level.update(deltaTimeMs);
 
   level.draw();
+
+  if (level.isFinished()) {
+    level = new Level();
+  }
 }
 
 function initializeGame() {
-  listenMouseClicks(canvas, level.onClick.bind(level));
+  listenMouseClicks(canvas, (screenX, screenY) =>
+    level.onClick(screenX, screenY)
+  );
 }
 
 initializeGame();

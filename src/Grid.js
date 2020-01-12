@@ -41,6 +41,18 @@ export default class Grid {
     }
   }
 
+  hasContiguousArea() {
+    for (let x = 0; x < this.array.xCount; x++) {
+      for (let y = 0; y < this.array.yCount; y++) {
+        if (this.isContiguousArea(x, y)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
   isContiguousArea(x, y) {
     const initial = this.array.getValue(x, y);
     if (!initial) {
