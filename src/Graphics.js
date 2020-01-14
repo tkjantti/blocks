@@ -103,3 +103,27 @@ export function drawScore(number) {
   ctx.globalAlpha = 1;
   ctx.fillText(text, x, y);
 }
+
+export function drawText(text) {
+  ctx.font = "60px Sans-serif";
+
+  const textWidth = ctx.measureText(text).width;
+  const textAreaWidth = textWidth * 1.2;
+  const textAreaHeight = 100;
+  const x = canvas.width / 2 - textWidth / 2;
+  const y = canvas.height * 0.45;
+
+  ctx.fillStyle = "lightblue";
+  ctx.globalAlpha = 0.4;
+  ctx.fillRect(
+    canvas.width / 2 - textAreaWidth / 2,
+    canvas.height / 2 - textAreaHeight,
+    textAreaWidth,
+    textAreaHeight
+  );
+
+  ctx.fillStyle = "white";
+  ctx.globalAlpha = 1;
+
+  ctx.fillText(text, x, y);
+}

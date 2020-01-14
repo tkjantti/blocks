@@ -24,17 +24,20 @@
 
 import { canvas } from "./Graphics.js";
 import { listenMouseClicks } from "./Controls.js";
-import { drawScore } from "./Graphics.js";
+import { drawScore, drawText } from "./Graphics.js";
 import { Level } from "./Level.js";
 
 const TIME_STEP = 1000 / 60;
 const MAX_FRAME = TIME_STEP * 5;
+
+const LEVEL_FINISH_TIMESPAN_MS = 1500;
 
 let lastTimeStampMs = 0;
 
 let score = 0;
 
 let level = new Level();
+let levelFinishTime = null;
 
 function gameLoop(ms) {
   requestAnimationFrame(gameLoop);
@@ -48,7 +51,16 @@ function gameLoop(ms) {
   drawScore(score);
 
   if (level.isFinished()) {
-    level = new Level();
+    const now = performance.now();
+
+    if (!levelFinishTime) {
+      levelFinishTime = now;
+    } else if (now - levelFinishTime < LEVEL_FINISH_TIMESPAN_MS) {
+      drawText("Level done!");
+    } else {
+      level = new Level();
+      levelFinishTime = null;
+    }
   }
 }
 
