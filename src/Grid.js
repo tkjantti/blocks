@@ -42,8 +42,9 @@ export default class Grid {
   }
 
   hasContiguousArea() {
+    // More likely to have blocks at bottom left, so start from there.
     for (let x = 0; x < this.array.xCount; x++) {
-      for (let y = 0; y < this.array.yCount; y++) {
+      for (let y = this.array.yCount - 1; y >= 0; y--) {
         if (this.isContiguousArea(x, y)) {
           return true;
         }
