@@ -92,6 +92,10 @@ function initializeGame() {
     score += level.onClick(screenX, screenY);
   });
 
+  window.addEventListener("unload", () => {
+    saveGame();
+  });
+
   loadGame();
 }
 
