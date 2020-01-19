@@ -27,6 +27,8 @@ import { listenMouseClicks } from "./Controls.js";
 import { drawScore, drawText } from "./Graphics.js";
 import { Level } from "./Level.js";
 
+const GAME_STORAGE_IDENTIFIER = "blocks-state";
+
 const TIME_STEP = 1000 / 60;
 const MAX_FRAME = TIME_STEP * 5;
 
@@ -38,6 +40,24 @@ let score = 0;
 
 let level = new Level();
 let levelFinishTime = null;
+
+function loadGame() {
+  const storedData = localStorage.getItem(GAME_STORAGE_IDENTIFIER);
+
+  if (storedData) {
+    const state = JSON.parse(storedData);
+    score = state.score;
+    level = Level.deserialize(state.level);
+  }
+}
+
+function saveGame() {
+  const state = {
+    score,
+    level: level.serialize()
+  };
+  localStorage.setItem(GAME_STORAGE_IDENTIFIER, JSON.stringify(state));
+}
 
 function gameLoop(ms) {
   requestAnimationFrame(gameLoop);
@@ -60,6 +80,8 @@ function gameLoop(ms) {
     } else {
       level = new Level();
       levelFinishTime = null;
+
+      saveGame();
     }
   }
 }
@@ -69,6 +91,8 @@ function initializeGame() {
   listenMouseClicks(canvas, (screenX, screenY) => {
     score += level.onClick(screenX, screenY);
   });
+
+  loadGame();
 }
 
 initializeGame();

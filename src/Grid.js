@@ -23,22 +23,43 @@
  */
 
 import Array2D from "./Array2D.js";
+import { BLOCK_NONE } from "./Block.js";
 
 export default class Grid {
   constructor(xSquareCount, ySquareCount) {
     this.array = new Array2D(xSquareCount, ySquareCount);
   }
 
-  initialize(getInitialBlockType) {
+  initialize(getBlockType) {
     for (let x = 0; x < this.array.xCount; x++) {
       for (let y = 0; y < this.array.yCount; y++) {
-        this.array.setValue(x, y, {
-          type: getInitialBlockType(),
-          stepsDown: 0,
-          stepsLeft: 0
-        });
+        const type = getBlockType(x, y);
+        if (type) {
+          this.array.setValue(x, y, {
+            type,
+            stepsDown: 0,
+            stepsLeft: 0
+          });
+        } else {
+          this.array.setValue(x, y, null);
+        }
       }
     }
+  }
+
+  serialize() {
+    return {
+      xCount: this.array.xCount,
+      yCount: this.array.yCount,
+      blocks: this.array.values.map(v => (v ? v.type : BLOCK_NONE))
+    };
+  }
+
+  static deserialize(state) {
+    const grid = new Grid(state.xCount, state.yCount);
+    const blocks = state.blocks;
+    grid.initialize((x, y) => blocks[x * state.yCount + y]);
+    return grid;
   }
 
   hasContiguousArea() {

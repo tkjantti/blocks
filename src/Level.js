@@ -49,6 +49,18 @@ export class Level {
     );
   }
 
+  serialize() {
+    return {
+      grid: this.grid.serialize()
+    };
+  }
+
+  static deserialize(state) {
+    const level = new Level();
+    level.grid = Grid.deserialize(state.grid);
+    return level;
+  }
+
   update(deltaTimeMs) {
     this.animateBlocks(deltaTimeMs);
   }
