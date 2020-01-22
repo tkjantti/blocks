@@ -75,8 +75,8 @@ export function drawGrid(grid, animState) {
 
         ctx.fillStyle = getColor(block.type);
         ctx.fillRect(
-          x * squareWidth - xShift,
-          y * squareHeight + yShift,
+          x * squareWidth + xShift,
+          y * squareHeight - yShift,
           squareWidth,
           squareHeight
         );

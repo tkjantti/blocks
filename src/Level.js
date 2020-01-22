@@ -88,21 +88,17 @@ export class Level {
     const count = this.grid.clearContiguousBlocks(x, y);
     const score = this.calculateScore(count);
 
-    this.startAnimation();
+    this.shiftDownCount = this.grid.shiftBlocksDown();
+    this.shiftLeftCount = this.grid.shiftBlocksLeft();
+
+    this.animState.shiftDawnRatio = this.shiftDownCount;
+    this.animState.shiftLeftRatio = this.shiftLeftCount;
 
     return score;
   }
 
   calculateScore(count) {
     return count * count;
-  }
-
-  startAnimation() {
-    this.shiftDownCount = this.grid.shiftBlocksDown();
-    if (this.shiftDownCount === 0) {
-      // No need to animate dropping down, start shift left animation immediately.
-      this.shiftLeftCount = this.grid.shiftBlocksLeft();
-    }
   }
 
   isAnimating() {
@@ -112,31 +108,32 @@ export class Level {
   animateBlocks(deltaTimeMs) {
     if (this.shiftDownCount > 0) {
       this.shiftDownTimeElapsed += deltaTimeMs;
-      const shiftDownRatio = this.shiftDownTimeElapsed / ANIM_SPEED;
+      const shiftUpRatio =
+        this.shiftDownCount - this.shiftDownTimeElapsed / ANIM_SPEED;
 
-      if (shiftDownRatio >= this.shiftDownCount) {
-        // Stop shift down animation
+      if (shiftUpRatio <= 0) {
+        // Stop shift down animation,
+        // ready to start horizontal shift.
         this.shiftDownTimeElapsed = 0;
         this.shiftDownCount = 0;
-        this.grid.resetVerticalPositions();
-
-        // Start shift left animation
-        this.shiftLeftCount = this.grid.shiftBlocksLeft();
+      } else {
+        this.animState.shiftDownRatio = shiftUpRatio;
       }
-
-      this.animState.shiftDownRatio = shiftDownRatio;
     } else if (this.shiftLeftCount > 0) {
       this.shiftLeftTimeElapsed += deltaTimeMs;
-      const shiftLeftRatio = this.shiftLeftTimeElapsed / ANIM_SPEED;
+      const shiftLeftRatio =
+        this.shiftLeftCount - this.shiftLeftTimeElapsed / ANIM_SPEED;
 
-      if (shiftLeftRatio >= this.shiftLeftCount) {
+      if (shiftLeftRatio <= 0) {
         // Shift left animation done
         this.shiftLeftTimeElapsed = 0;
         this.shiftLeftCount = 0;
-        this.grid.resetHorizontalPositions();
-      }
 
-      this.animState.shiftLeftRatio = shiftLeftRatio;
+        // Full shift animation done
+        this.grid.resetShiftValues();
+      } else {
+        this.animState.shiftLeftRatio = shiftLeftRatio;
+      }
     }
   }
 }
