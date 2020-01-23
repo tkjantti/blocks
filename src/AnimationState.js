@@ -24,7 +24,7 @@
 
 export default class AnimationState {
   constructor() {
-    this.shiftDownRatio = 0;
-    this.shiftLeftRatio = 0;
+    this.xShift = 0;
+    this.yShift = 0;
   }
 }

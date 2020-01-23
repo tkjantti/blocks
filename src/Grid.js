@@ -37,8 +37,8 @@ export default class Grid {
         if (type) {
           this.array.setValue(x, y, {
             type,
-            stepsDown: 0,
-            stepsLeft: 0
+            yShift: 0,
+            xShift: 0
           });
         } else {
           this.array.setValue(x, y, null);
@@ -177,10 +177,10 @@ export default class Grid {
       for (let y = this.array.yCount - 1; y >= 0; y--) {
         const block = this.array.getValue(x, y);
         if (block) {
-          block.stepsDown = emptyBlocksBelowCount;
+          block.yShift = emptyBlocksBelowCount;
 
           this.array.setValue(x, y, null);
-          this.array.setValue(x, y + block.stepsDown, block);
+          this.array.setValue(x, y + block.yShift, block);
 
           topShiftDownCount = Math.max(
             topShiftDownCount,
@@ -207,9 +207,9 @@ export default class Grid {
         if (block) {
           allEmpty = false;
           if (emptyColumnCount > 0) {
-            block.stepsLeft = emptyColumnCount;
+            block.xShift = emptyColumnCount;
             this.array.setValue(x, y, null);
-            this.array.setValue(x - block.stepsLeft, y, block);
+            this.array.setValue(x - block.xShift, y, block);
           }
         }
       }
@@ -230,11 +230,11 @@ export default class Grid {
         let block = this.array.getValue(x, y);
 
         if (block) {
-          if (block.stepsDown !== 0) {
-            block.stepsDown = 0;
+          if (block.yShift !== 0) {
+            block.yShift = 0;
           }
-          if (block.stepsLeft !== 0) {
-            block.stepsLeft = 0;
+          if (block.xShift !== 0) {
+            block.xShift = 0;
           }
         }
       }

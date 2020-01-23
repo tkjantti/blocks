@@ -37,11 +37,11 @@ export class Level {
     this.grid = new Grid(xSquareCount, ySquareCount, BLOCK_NONE);
     this.animState = new AnimationState();
 
-    this.shiftDownTimeElapsed = 0;
-    this.shiftDownCount = 0;
+    this.yShiftTimeElapsed = 0;
+    this.yShiftSquares = 0;
 
-    this.shiftLeftTimeElapsed = 0;
-    this.shiftLeftCount = 0;
+    this.xShiftTimeElapsed = 0;
+    this.xShiftSquares = 0;
 
     const blockTypes = [BLOCK_RED, BLOCK_YELLOW, BLOCK_GREEN];
     this.grid.initialize(
@@ -88,11 +88,11 @@ export class Level {
     const count = this.grid.clearContiguousBlocks(x, y);
     const score = this.calculateScore(count);
 
-    this.shiftDownCount = this.grid.shiftBlocksDown();
-    this.shiftLeftCount = this.grid.shiftBlocksLeft();
+    this.yShiftSquares = this.grid.shiftBlocksDown();
+    this.xShiftSquares = this.grid.shiftBlocksLeft();
 
-    this.animState.shiftDawnRatio = this.shiftDownCount;
-    this.animState.shiftLeftRatio = this.shiftLeftCount;
+    this.animState.yShift = this.yShiftSquares;
+    this.animState.xShift = this.xShiftSquares;
 
     return score;
   }
@@ -102,37 +102,39 @@ export class Level {
   }
 
   isAnimating() {
-    return this.shiftDownCount > 0 || this.shiftLeftCount > 0;
+    return this.yShiftSquares > 0 || this.xShiftSquares > 0;
   }
 
   animateBlocks(deltaTimeMs) {
-    if (this.shiftDownCount > 0) {
-      this.shiftDownTimeElapsed += deltaTimeMs;
-      const shiftUpRatio =
-        this.shiftDownCount - this.shiftDownTimeElapsed / ANIM_SPEED;
+    if (this.yShiftSquares > 0) {
+      this.yShiftTimeElapsed += deltaTimeMs;
 
-      if (shiftUpRatio <= 0) {
+      const currentYShift =
+        this.yShiftSquares - this.yShiftTimeElapsed / ANIM_SPEED;
+
+      if (0 < currentYShift) {
+        this.animState.yShift = currentYShift;
+      } else {
         // Stop shift down animation,
         // ready to start horizontal shift.
-        this.shiftDownTimeElapsed = 0;
-        this.shiftDownCount = 0;
-      } else {
-        this.animState.shiftDownRatio = shiftUpRatio;
+        this.yShiftTimeElapsed = 0;
+        this.yShiftSquares = 0;
       }
-    } else if (this.shiftLeftCount > 0) {
-      this.shiftLeftTimeElapsed += deltaTimeMs;
-      const shiftLeftRatio =
-        this.shiftLeftCount - this.shiftLeftTimeElapsed / ANIM_SPEED;
+    } else if (this.xShiftSquares > 0) {
+      this.xShiftTimeElapsed += deltaTimeMs;
 
-      if (shiftLeftRatio <= 0) {
-        // Shift left animation done
-        this.shiftLeftTimeElapsed = 0;
-        this.shiftLeftCount = 0;
+      const currentXShift =
+        this.xShiftSquares - this.xShiftTimeElapsed / ANIM_SPEED;
 
-        // Full shift animation done
-        this.grid.resetShiftValues();
+      if (0 < currentXShift) {
+        this.animState.xShift = currentXShift;
       } else {
-        this.animState.shiftLeftRatio = shiftLeftRatio;
+        // Shift left animation done
+        this.xShiftTimeElapsed = 0;
+        this.xShiftSquares = 0;
+
+        // Both vertical and horizontal animation done.
+        this.grid.resetShiftValues();
       }
     }
   }

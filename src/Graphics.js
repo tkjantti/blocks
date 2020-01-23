@@ -68,10 +68,8 @@ export function drawGrid(grid, animState) {
       const block = array2D.getValue(x, y);
 
       if (block) {
-        const yShift =
-          Math.min(animState.shiftDownRatio, block.stepsDown) * squareHeight;
-        const xShift =
-          Math.min(animState.shiftLeftRatio, block.stepsLeft) * squareWidth;
+        const yShift = Math.min(animState.yShift, block.yShift) * squareHeight;
+        const xShift = Math.min(animState.xShift, block.xShift) * squareWidth;
 
         ctx.fillStyle = getColor(block.type);
         ctx.fillRect(
