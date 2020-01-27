@@ -24,7 +24,7 @@
 
 import { canvas } from "./Graphics.js";
 import { listenMouseClicks } from "./Controls.js";
-import { drawScore, drawText } from "./Graphics.js";
+import { drawText, drawUi } from "./Graphics.js";
 import { Level } from "./Level.js";
 
 const GAME_STORAGE_IDENTIFIER = "blocks-state";
@@ -68,7 +68,7 @@ function gameLoop(ms) {
   level.update(deltaTimeMs);
 
   level.draw();
-  drawScore(score);
+  drawUi(ms, score);
 
   if (level.isFinished()) {
     const now = performance.now();

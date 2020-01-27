@@ -83,23 +83,45 @@ export function drawGrid(grid, animState) {
   }
 }
 
-export function drawScore(number) {
+function drawTime(ms) {
+  const totalSeconds = ms / 1000;
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = Math.round(totalSeconds % 60);
+  const pad = seconds < 10 ? "0" : "";
+
+  const text = `${minutes}:${pad}${seconds}`;
+
+  ctx.font = "40px Sans-serif";
+  ctx.fillStyle = "blue";
+
+  const textWidth = ctx.measureText(text).width;
+  const x = canvas.width / 2 - textWidth / 2;
+  const y = 50;
+
+  ctx.fillText(text, x, y);
+}
+
+function drawScore(number) {
   const text = number.toString();
 
   ctx.font = "40px Sans-serif";
 
   const textWidth = ctx.measureText(text).width;
-  const textAreaWidth = 300;
   const x = canvas.width - textWidth - 20;
   const y = 50;
 
-  ctx.fillStyle = "lightblue";
-  ctx.globalAlpha = 0.1;
-  ctx.fillRect(canvas.width - textAreaWidth, 0, textAreaWidth, 70);
-
-  ctx.fillStyle = "blue";
-  ctx.globalAlpha = 1;
+  ctx.fillStyle = "purple";
   ctx.fillText(text, x, y);
+}
+
+export function drawUi(ms, score) {
+  ctx.fillStyle = "lightblue";
+  ctx.globalAlpha = 0.3;
+  ctx.fillRect(0, 0, canvas.width, 70);
+  ctx.globalAlpha = 1.0;
+
+  drawTime(ms);
+  drawScore(score);
 }
 
 export function drawText(text) {
