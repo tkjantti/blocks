@@ -32,9 +32,12 @@ const GAME_STORAGE_IDENTIFIER = "blocks-state";
 const TIME_STEP = 1000 / 60;
 const MAX_FRAME = TIME_STEP * 5;
 
-const LEVEL_FINISH_TIMESPAN_MS = 1500;
+const LEVEL_FINISH_TIMESPAN_MS = 1.5 * 1000;
+const START_COUNTDOWN_TIMESPAN_MS = 60 * 1000;
 
 let lastTimeStampMs = 0;
+
+let countdownTime = START_COUNTDOWN_TIMESPAN_MS;
 
 let score = 0;
 
@@ -65,10 +68,15 @@ function gameLoop(ms) {
   const deltaTimeMs = Math.min(ms - lastTimeStampMs, MAX_FRAME);
   lastTimeStampMs = ms;
 
+  const updatedCountdownTime = countdownTime - deltaTimeMs;
+  if (updatedCountdownTime > 0) {
+    countdownTime = updatedCountdownTime;
+  }
+
   level.update(deltaTimeMs);
 
   level.draw();
-  drawUi(ms, score);
+  drawUi(countdownTime, score);
 
   if (level.isFinished()) {
     const now = performance.now();
