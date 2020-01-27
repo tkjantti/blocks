@@ -28,8 +28,8 @@ export const canvas = document.querySelector("#board canvas");
 
 const ctx = canvas.getContext("2d");
 
-export const squareWidth = 64;
-export const squareHeight = 64;
+export const squareWidth = 32;
+export const squareHeight = 32;
 
 function getColor(blockType) {
   switch (blockType) {
