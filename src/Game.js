@@ -55,6 +55,7 @@ export class Game {
     const state = JSON.parse(storedData);
     const game = new Game();
     game.score = state.score;
+    game.countdownTime = state.countdownTime;
     game.level = Level.deserialize(state.level);
     return game;
   }
@@ -62,6 +63,7 @@ export class Game {
   save() {
     const state = {
       score: this.score,
+      countdownTime: this.countdownTime,
       level: this.level.serialize()
     };
     localStorage.setItem(GAME_STORAGE_IDENTIFIER, JSON.stringify(state));
