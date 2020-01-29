@@ -24,97 +24,27 @@
 
 import { canvas } from "./Graphics.js";
 import { listenMouseClicks } from "./Controls.js";
-import { drawText, drawUi } from "./Graphics.js";
-import { Level } from "./Level.js";
+import { Game } from "./Game.js";
 
-const GAME_STORAGE_IDENTIFIER = "blocks-state";
-
-const TIME_STEP = 1000 / 60;
-const MAX_FRAME = TIME_STEP * 5;
-
-const LEVEL_FINISH_TIMESPAN_MS = 1.5 * 1000;
-const START_COUNTDOWN_TIMESPAN_MS = 60 * 1000;
-
-let lastTimeStampMs = 0;
-
-let countdownTime = START_COUNTDOWN_TIMESPAN_MS;
-
-let score = 0;
-
-let level = new Level();
-let levelFinishTime = null;
-
-let gameOver = false;
-
-function loadGame() {
-  const storedData = localStorage.getItem(GAME_STORAGE_IDENTIFIER);
-
-  if (storedData) {
-    const state = JSON.parse(storedData);
-    score = state.score;
-    level = Level.deserialize(state.level);
-  }
-}
-
-function saveGame() {
-  const state = {
-    score,
-    level: level.serialize()
-  };
-  localStorage.setItem(GAME_STORAGE_IDENTIFIER, JSON.stringify(state));
-}
-
-function gameLoop(ms) {
-  requestAnimationFrame(gameLoop);
-
-  const deltaTimeMs = Math.min(ms - lastTimeStampMs, MAX_FRAME);
-  lastTimeStampMs = ms;
-
-  const updatedCountdownTime = countdownTime - deltaTimeMs;
-  if (updatedCountdownTime > 0) {
-    countdownTime = updatedCountdownTime;
-  } else {
-    gameOver = true;
-  }
-
-  level.update(deltaTimeMs);
-
-  level.draw();
-  drawUi(countdownTime, score);
-
-  if (gameOver) {
-    drawText("Game over!");
-  } else if (level.isFinished()) {
-    const now = performance.now();
-
-    if (!levelFinishTime) {
-      levelFinishTime = now;
-    } else if (now - levelFinishTime < LEVEL_FINISH_TIMESPAN_MS) {
-      drawText("Level done!");
-    } else {
-      level = new Level();
-      levelFinishTime = null;
-
-      saveGame();
-    }
-  }
-}
+let game;
 
 function initializeGame() {
-  score = 0;
+  game = Game.load() || new Game();
+
   listenMouseClicks(canvas, (screenX, screenY) => {
-    if (gameOver) {
-      return;
+    if (!game.isOver) {
+      game.onClick(screenX, screenY);
+    } else {
+      game = new Game();
+      game.start();
     }
-    score += level.onClick(screenX, screenY);
   });
 
   window.addEventListener("unload", () => {
-    saveGame();
+    game.save();
   });
 
-  loadGame();
+  game.start();
 }
 
 initializeGame();
-requestAnimationFrame(gameLoop);
