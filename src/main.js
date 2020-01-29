@@ -44,6 +44,8 @@ let score = 0;
 let level = new Level();
 let levelFinishTime = null;
 
+let gameOver = false;
+
 function loadGame() {
   const storedData = localStorage.getItem(GAME_STORAGE_IDENTIFIER);
 
@@ -71,6 +73,8 @@ function gameLoop(ms) {
   const updatedCountdownTime = countdownTime - deltaTimeMs;
   if (updatedCountdownTime > 0) {
     countdownTime = updatedCountdownTime;
+  } else {
+    gameOver = true;
   }
 
   level.update(deltaTimeMs);
@@ -78,7 +82,9 @@ function gameLoop(ms) {
   level.draw();
   drawUi(countdownTime, score);
 
-  if (level.isFinished()) {
+  if (gameOver) {
+    drawText("Game over!");
+  } else if (level.isFinished()) {
     const now = performance.now();
 
     if (!levelFinishTime) {
@@ -97,6 +103,9 @@ function gameLoop(ms) {
 function initializeGame() {
   score = 0;
   listenMouseClicks(canvas, (screenX, screenY) => {
+    if (gameOver) {
+      return;
+    }
     score += level.onClick(screenX, screenY);
   });
 
