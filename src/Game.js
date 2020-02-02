@@ -42,6 +42,7 @@ export class Game {
     this.countdownTime = COUNTDOWN_TIMESPAN_INCREASE_MS;
     this.score = 0;
     this.targetScore = SCORE_TARGET_BASE;
+    this.targetScoreSetCount = 1;
 
     this.level = new Level();
     this.levelFinishTime = null;
@@ -58,6 +59,7 @@ export class Game {
     const state = JSON.parse(storedData);
     const game = new Game();
     game.score = state.score;
+    game.targetScore = state.targetScore;
     game.countdownTime = state.countdownTime;
     game.level = Level.deserialize(state.level);
     return game;
@@ -66,6 +68,7 @@ export class Game {
   save() {
     const state = {
       score: this.score,
+      targetScore: this.targetScore,
       countdownTime: this.countdownTime,
       level: this.level.serialize()
     };
@@ -93,7 +96,9 @@ export class Game {
     let updatedCountdownTime = this.countdownTime - deltaTimeMs;
     if (updatedCountdownTime > 0) {
       if (this.score >= this.targetScore) {
-        this.targetScore = this.score + 500;
+        this.targetScoreSetCount += 1;
+        this.targetScore =
+          this.score + this.targetScoreSetCount * SCORE_TARGET_BASE;
         updatedCountdownTime += COUNTDOWN_TIMESPAN_INCREASE_MS;
       }
 
