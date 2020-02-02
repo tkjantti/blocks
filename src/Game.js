@@ -31,15 +31,17 @@ const TIME_STEP = 1000 / 60;
 const MAX_FRAME = TIME_STEP * 5;
 
 const LEVEL_FINISH_TIMESPAN_MS = 1.5 * 1000;
-const START_COUNTDOWN_TIMESPAN_MS = 60 * 1000;
+const COUNTDOWN_TIMESPAN_INCREASE_MS = 60 * 1000;
+
+const SCORE_TARGET_BASE = 500;
 
 export class Game {
   constructor() {
     this.lastTimeStampMs = 0;
 
-    this.countdownTime = START_COUNTDOWN_TIMESPAN_MS;
+    this.countdownTime = COUNTDOWN_TIMESPAN_INCREASE_MS;
     this.score = 0;
-    this.targetScore = 1000;
+    this.targetScore = SCORE_TARGET_BASE;
 
     this.level = new Level();
     this.levelFinishTime = null;
@@ -88,8 +90,13 @@ export class Game {
     const deltaTimeMs = Math.min(ms - this.lastTimeStampMs, MAX_FRAME);
     this.lastTimeStampMs = ms;
 
-    const updatedCountdownTime = this.countdownTime - deltaTimeMs;
+    let updatedCountdownTime = this.countdownTime - deltaTimeMs;
     if (updatedCountdownTime > 0) {
+      if (this.score >= this.targetScore) {
+        this.targetScore = this.score + 500;
+        updatedCountdownTime += COUNTDOWN_TIMESPAN_INCREASE_MS;
+      }
+
       this.countdownTime = updatedCountdownTime;
     } else {
       this.isOver = true;
