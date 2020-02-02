@@ -101,27 +101,38 @@ function drawTime(ms) {
   ctx.fillText(text, x, y);
 }
 
-function drawScore(number) {
+function drawTotalScore(number) {
   const text = number.toString();
 
-  ctx.font = "40px Sans-serif";
+  ctx.font = "30px Sans-serif";
 
   const textWidth = ctx.measureText(text).width;
   const x = canvas.width - textWidth - 20;
-  const y = 50;
+  const y = 30;
 
   ctx.fillStyle = "purple";
   ctx.fillText(text, x, y);
 }
 
-export function drawUi(ms, score) {
+function drawTargetScore(number) {
+  ctx.font = "30px Sans-serif";
+  ctx.fillStyle = "purple";
+  ctx.fillText("Target:", 20, 30);
+
+  ctx.font = "50px Sans-serif";
+  ctx.fillStyle = "purple";
+  ctx.fillText(number.toString(), 20, 80);
+}
+
+export function drawUi(ms, totalScore, targetScore) {
   ctx.fillStyle = "lightblue";
   ctx.globalAlpha = 0.3;
-  ctx.fillRect(0, 0, canvas.width, 70);
+  ctx.fillRect(0, 0, canvas.width, 100);
   ctx.globalAlpha = 1.0;
 
   drawTime(ms);
-  drawScore(score);
+  drawTotalScore(totalScore);
+  drawTargetScore(targetScore);
 }
 
 export function drawText(text) {

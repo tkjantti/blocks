@@ -39,6 +39,7 @@ export class Game {
 
     this.countdownTime = START_COUNTDOWN_TIMESPAN_MS;
     this.score = 0;
+    this.targetScore = 1000;
 
     this.level = new Level();
     this.levelFinishTime = null;
@@ -97,7 +98,7 @@ export class Game {
     this.level.update(deltaTimeMs);
 
     this.level.draw();
-    drawUi(this.countdownTime, this.score);
+    drawUi(this.countdownTime, this.score, this.targetScore - this.score);
 
     if (this.isOver) {
       drawText("Game over!");
