@@ -69,6 +69,10 @@ export class Game {
     localStorage.setItem(GAME_STORAGE_IDENTIFIER, JSON.stringify(state));
   }
 
+  clearSavedData() {
+    localStorage.removeItem(GAME_STORAGE_IDENTIFIER);
+  }
+
   onClick(screenX, screenY) {
     if (this.isOver) {
       return;

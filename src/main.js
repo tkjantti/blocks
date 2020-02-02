@@ -41,7 +41,11 @@ function initializeGame() {
   });
 
   window.addEventListener("unload", () => {
-    game.save();
+    if (game.isOver) {
+      game.clearSavedData();
+    } else {
+      game.save();
+    }
   });
 
   game.start();
