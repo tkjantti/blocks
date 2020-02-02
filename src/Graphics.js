@@ -28,9 +28,6 @@ export const canvas = document.querySelector("#board canvas");
 
 const ctx = canvas.getContext("2d");
 
-export const squareWidth = 32;
-export const squareHeight = 32;
-
 function getColor(blockType) {
   switch (blockType) {
     case BLOCK_RED:
@@ -44,7 +41,7 @@ function getColor(blockType) {
   }
 }
 
-function drawBackground(array2D) {
+function drawBackground(array2D, squareWidth, squareHeight) {
   for (let x = 0; x < array2D.xCount; x++) {
     for (let y = 0; y < array2D.yCount; y++) {
       ctx.fillStyle = `hsl(200, ${40 + ((x + y) % 2) * 30}%, 20%)`;
@@ -60,8 +57,10 @@ function drawBackground(array2D) {
 
 export function drawGrid(grid, animState) {
   const array2D = grid.array;
+  const squareWidth = canvas.width / array2D.xCount;
+  const squareHeight = canvas.height / array2D.yCount;
 
-  drawBackground(array2D);
+  drawBackground(array2D, squareWidth, squareHeight);
 
   for (let x = 0; x < array2D.xCount; x++) {
     for (let y = 0; y < array2D.yCount; y++) {

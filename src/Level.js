@@ -23,14 +23,14 @@
  */
 
 import Grid from "./Grid.js";
-import { squareWidth, squareHeight, canvas, drawGrid } from "./Graphics.js";
+import { canvas, drawGrid } from "./Graphics.js";
 import AnimationState from "./AnimationState.js";
 import { BLOCK_NONE, BLOCK_RED, BLOCK_YELLOW, BLOCK_GREEN } from "./Block.js";
 
 const ANIM_SPEED = 100;
 
-const xSquareCount = Math.floor(canvas.width / squareWidth);
-const ySquareCount = Math.floor(canvas.height / squareHeight);
+const xSquareCount = 12;
+const ySquareCount = 9;
 
 export class Level {
   constructor() {
@@ -77,6 +77,10 @@ export class Level {
     if (this.isAnimating()) {
       return 0;
     }
+
+    const { xCount, yCount } = this.grid.array;
+    const squareWidth = canvas.width / xCount;
+    const squareHeight = canvas.height / yCount;
 
     const x = Math.floor(screenX / squareWidth);
     const y = Math.floor(screenY / squareHeight);
