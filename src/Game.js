@@ -31,7 +31,7 @@ const TIME_STEP = 1000 / 60;
 const MAX_FRAME = TIME_STEP * 5;
 
 const LEVEL_FINISH_TIMESPAN_MS = 1.5 * 1000;
-const COUNTDOWN_TIMESPAN_INCREASE_MS = 60 * 1000;
+const COUNTDOWN_TIMESPAN_MS = 60 * 1000;
 
 const SCORE_TARGET_BASE = 500;
 
@@ -39,7 +39,7 @@ export class Game {
   constructor() {
     this.lastTimeStampMs = 0;
 
-    this.countdownTime = COUNTDOWN_TIMESPAN_INCREASE_MS;
+    this.countdownTime = COUNTDOWN_TIMESPAN_MS;
     this.score = 0;
     this.targetScore = SCORE_TARGET_BASE;
     this.targetScoreSetCount = 1;
@@ -99,7 +99,7 @@ export class Game {
         this.targetScoreSetCount += 1;
         this.targetScore =
           this.score + this.targetScoreSetCount * SCORE_TARGET_BASE;
-        updatedCountdownTime += COUNTDOWN_TIMESPAN_INCREASE_MS;
+        updatedCountdownTime = COUNTDOWN_TIMESPAN_MS;
       }
 
       this.countdownTime = updatedCountdownTime;
