@@ -32,6 +32,7 @@ const MAX_FRAME = TIME_STEP * 5;
 
 const LEVEL_FINISH_TIMESPAN_MS = 1.5 * 1000;
 const COUNTDOWN_TIMESPAN_MS = 60 * 1000;
+const GAME_OVER_TIMESPAN_MS = 3 * 1000;
 
 const SCORE_TARGET_BASE = 500;
 
@@ -47,7 +48,8 @@ export class Game {
     this.level = new Level();
     this.levelFinishTime = null;
 
-    this.isOver = false;
+    this.gameOverTime = null;
+    this.readyForNewGame = false;
   }
 
   static load() {
@@ -79,14 +81,18 @@ export class Game {
     localStorage.removeItem(GAME_STORAGE_IDENTIFIER);
   }
 
-  // Returns false when a new game is requested.
+  isOver() {
+    return this.gameOverTime != null;
+  }
+
+  // Returns true when a new game is requested.
   onClick(screenX, screenY) {
-    if (this.isOver) {
-      return false;
+    if (this.gameOverTime != null) {
+      return this.readyForNewGame;
     }
 
     this.score += this.level.onClick(screenX, screenY);
-    return true;
+    return false;
   }
 
   gameLoop(ms) {
@@ -94,19 +100,10 @@ export class Game {
 
     const deltaTimeMs = Math.min(ms - this.lastTimeStampMs, MAX_FRAME);
     this.lastTimeStampMs = ms;
+    const now = performance.now();
 
-    let updatedCountdownTime = this.countdownTime - deltaTimeMs;
-    if (updatedCountdownTime > 0) {
-      if (this.score >= this.targetScore) {
-        this.targetScoreSetCount += 1;
-        this.targetScore =
-          this.score + this.targetScoreSetCount * SCORE_TARGET_BASE;
-        updatedCountdownTime = COUNTDOWN_TIMESPAN_MS;
-      }
-
-      this.countdownTime = updatedCountdownTime;
-    } else {
-      this.isOver = true;
+    if (this.gameOverTime == null && !this.updateCountdown(deltaTimeMs)) {
+      this.gameOverTime = now;
     }
 
     this.level.update(deltaTimeMs);
@@ -114,11 +111,14 @@ export class Game {
     this.level.draw();
     drawUi(this.countdownTime, this.score, this.targetScore - this.score);
 
-    if (this.isOver) {
-      drawText("Game over!");
+    if (this.gameOverTime != null) {
+      if (now - this.gameOverTime < GAME_OVER_TIMESPAN_MS) {
+        drawText("Game over!");
+      } else {
+        drawText("Click to try again");
+        this.readyForNewGame = true;
+      }
     } else if (this.level.isFinished()) {
-      const now = performance.now();
-
       if (!this.levelFinishTime) {
         this.levelFinishTime = now;
       } else if (now - this.levelFinishTime < LEVEL_FINISH_TIMESPAN_MS) {
@@ -130,6 +130,25 @@ export class Game {
         this.save();
       }
     }
+  }
+
+  updateCountdown(deltaTimeMs) {
+    let updatedCountdownTime = this.countdownTime - deltaTimeMs;
+
+    if (updatedCountdownTime > 0) {
+      if (this.score >= this.targetScore) {
+        this.targetScoreSetCount += 1;
+        this.targetScore =
+          this.score + this.targetScoreSetCount * SCORE_TARGET_BASE;
+        updatedCountdownTime = COUNTDOWN_TIMESPAN_MS;
+      }
+
+      this.countdownTime = updatedCountdownTime;
+    } else {
+      return false;
+    }
+
+    return true;
   }
 
   start() {

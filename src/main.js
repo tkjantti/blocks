@@ -32,16 +32,16 @@ function initializeGame() {
   game = Game.load() || new Game();
 
   listenMouseClicks(canvas, (screenX, screenY) => {
-    const isOn = game.onClick(screenX, screenY);
+    const readyForNewGame = game.onClick(screenX, screenY);
 
-    if (!isOn) {
+    if (readyForNewGame) {
       game = new Game();
       game.start();
     }
   });
 
   window.addEventListener("unload", () => {
-    if (game.isOver) {
+    if (game.isOver()) {
       game.clearSavedData();
     } else {
       game.save();
