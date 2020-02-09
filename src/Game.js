@@ -79,12 +79,14 @@ export class Game {
     localStorage.removeItem(GAME_STORAGE_IDENTIFIER);
   }
 
+  // Returns false when a new game is requested.
   onClick(screenX, screenY) {
     if (this.isOver) {
-      return;
+      return false;
     }
 
     this.score += this.level.onClick(screenX, screenY);
+    return true;
   }
 
   gameLoop(ms) {

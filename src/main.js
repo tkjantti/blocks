@@ -32,9 +32,9 @@ function initializeGame() {
   game = Game.load() || new Game();
 
   listenMouseClicks(canvas, (screenX, screenY) => {
-    if (!game.isOver) {
-      game.onClick(screenX, screenY);
-    } else {
+    const isOn = game.onClick(screenX, screenY);
+
+    if (!isOn) {
       game = new Game();
       game.start();
     }
