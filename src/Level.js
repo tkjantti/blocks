@@ -23,30 +23,42 @@
  */
 
 import Grid from "./Grid.js";
-import { squareWidth, squareHeight, canvas, drawGrid } from "./Graphics.js";
+import { canvas, drawGrid } from "./Graphics.js";
 import AnimationState from "./AnimationState.js";
 import { BLOCK_NONE, BLOCK_RED, BLOCK_YELLOW, BLOCK_GREEN } from "./Block.js";
 
 const ANIM_SPEED = 100;
 
-const xSquareCount = Math.floor(canvas.width / squareWidth);
-const ySquareCount = Math.floor(canvas.height / squareHeight);
+const xSquareCount = 12;
+const ySquareCount = 9;
 
 export class Level {
   constructor() {
     this.grid = new Grid(xSquareCount, ySquareCount, BLOCK_NONE);
     this.animState = new AnimationState();
 
-    this.shiftDownTimeElapsed = 0;
-    this.shiftDownCount = 0;
+    this.yShiftTimeElapsed = 0;
+    this.yShiftSquares = 0;
 
-    this.shiftLeftTimeElapsed = 0;
-    this.shiftLeftCount = 0;
+    this.xShiftTimeElapsed = 0;
+    this.xShiftSquares = 0;
 
     const blockTypes = [BLOCK_RED, BLOCK_YELLOW, BLOCK_GREEN];
     this.grid.initialize(
       () => blockTypes[Math.floor(Math.random() * blockTypes.length)]
     );
+  }
+
+  serialize() {
+    return {
+      grid: this.grid.serialize()
+    };
+  }
+
+  static deserialize(state) {
+    const level = new Level();
+    level.grid = Grid.deserialize(state.grid);
+    return level;
   }
 
   update(deltaTimeMs) {
@@ -66,6 +78,10 @@ export class Level {
       return 0;
     }
 
+    const { xCount, yCount } = this.grid.array;
+    const squareWidth = canvas.width / xCount;
+    const squareHeight = canvas.height / yCount;
+
     const x = Math.floor(screenX / squareWidth);
     const y = Math.floor(screenY / squareHeight);
 
@@ -76,7 +92,11 @@ export class Level {
     const count = this.grid.clearContiguousBlocks(x, y);
     const score = this.calculateScore(count);
 
-    this.startAnimation();
+    this.yShiftSquares = this.grid.shiftBlocksDown();
+    this.xShiftSquares = this.grid.shiftBlocksLeft();
+
+    this.animState.yShift = this.yShiftSquares;
+    this.animState.xShift = this.xShiftSquares;
 
     return score;
   }
@@ -85,46 +105,41 @@ export class Level {
     return count * count;
   }
 
-  startAnimation() {
-    this.shiftDownCount = this.grid.shiftBlocksDown();
-    if (this.shiftDownCount === 0) {
-      // No need to animate dropping down, start shift left animation immediately.
-      this.shiftLeftCount = this.grid.shiftBlocksLeft();
-    }
-  }
-
   isAnimating() {
-    return this.shiftDownCount > 0 || this.shiftLeftCount > 0;
+    return this.yShiftSquares > 0 || this.xShiftSquares > 0;
   }
 
   animateBlocks(deltaTimeMs) {
-    if (this.shiftDownCount > 0) {
-      this.shiftDownTimeElapsed += deltaTimeMs;
-      const shiftDownRatio = this.shiftDownTimeElapsed / ANIM_SPEED;
+    if (this.yShiftSquares > 0) {
+      this.yShiftTimeElapsed += deltaTimeMs;
 
-      if (shiftDownRatio >= this.shiftDownCount) {
-        // Stop shift down animation
-        this.shiftDownTimeElapsed = 0;
-        this.shiftDownCount = 0;
-        this.grid.resetVerticalPositions();
+      const currentYShift =
+        this.yShiftSquares - this.yShiftTimeElapsed / ANIM_SPEED;
 
-        // Start shift left animation
-        this.shiftLeftCount = this.grid.shiftBlocksLeft();
+      if (0 < currentYShift) {
+        this.animState.yShift = currentYShift;
+      } else {
+        // Stop shift down animation,
+        // ready to start horizontal shift.
+        this.yShiftTimeElapsed = 0;
+        this.yShiftSquares = 0;
       }
+    } else if (this.xShiftSquares > 0) {
+      this.xShiftTimeElapsed += deltaTimeMs;
 
-      this.animState.shiftDownRatio = shiftDownRatio;
-    } else if (this.shiftLeftCount > 0) {
-      this.shiftLeftTimeElapsed += deltaTimeMs;
-      const shiftLeftRatio = this.shiftLeftTimeElapsed / ANIM_SPEED;
+      const currentXShift =
+        this.xShiftSquares - this.xShiftTimeElapsed / ANIM_SPEED;
 
-      if (shiftLeftRatio >= this.shiftLeftCount) {
+      if (0 < currentXShift) {
+        this.animState.xShift = currentXShift;
+      } else {
         // Shift left animation done
-        this.shiftLeftTimeElapsed = 0;
-        this.shiftLeftCount = 0;
-        this.grid.resetHorizontalPositions();
-      }
+        this.xShiftTimeElapsed = 0;
+        this.xShiftSquares = 0;
 
-      this.animState.shiftLeftRatio = shiftLeftRatio;
+        // Both vertical and horizontal animation done.
+        this.grid.resetShiftValues();
+      }
     }
   }
 }

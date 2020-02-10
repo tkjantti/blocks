@@ -24,52 +24,31 @@
 
 import { canvas } from "./Graphics.js";
 import { listenMouseClicks } from "./Controls.js";
-import { drawScore, drawText } from "./Graphics.js";
-import { Level } from "./Level.js";
+import { Game } from "./Game.js";
 
-const TIME_STEP = 1000 / 60;
-const MAX_FRAME = TIME_STEP * 5;
-
-const LEVEL_FINISH_TIMESPAN_MS = 1500;
-
-let lastTimeStampMs = 0;
-
-let score = 0;
-
-let level = new Level();
-let levelFinishTime = null;
-
-function gameLoop(ms) {
-  requestAnimationFrame(gameLoop);
-
-  const deltaTimeMs = Math.min(ms - lastTimeStampMs, MAX_FRAME);
-  lastTimeStampMs = ms;
-
-  level.update(deltaTimeMs);
-
-  level.draw();
-  drawScore(score);
-
-  if (level.isFinished()) {
-    const now = performance.now();
-
-    if (!levelFinishTime) {
-      levelFinishTime = now;
-    } else if (now - levelFinishTime < LEVEL_FINISH_TIMESPAN_MS) {
-      drawText("Level done!");
-    } else {
-      level = new Level();
-      levelFinishTime = null;
-    }
-  }
-}
+let game;
 
 function initializeGame() {
-  score = 0;
+  game = Game.load() || new Game();
+
   listenMouseClicks(canvas, (screenX, screenY) => {
-    score += level.onClick(screenX, screenY);
+    const readyForNewGame = game.onClick(screenX, screenY);
+
+    if (readyForNewGame) {
+      game = new Game();
+      game.start();
+    }
   });
+
+  window.addEventListener("unload", () => {
+    if (game.isOver()) {
+      game.clearSavedData();
+    } else {
+      game.save();
+    }
+  });
+
+  game.start();
 }
 
 initializeGame();
-requestAnimationFrame(gameLoop);

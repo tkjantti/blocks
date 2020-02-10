@@ -28,9 +28,6 @@ export const canvas = document.querySelector("#board canvas");
 
 const ctx = canvas.getContext("2d");
 
-export const squareWidth = 64;
-export const squareHeight = 64;
-
 function getColor(blockType) {
   switch (blockType) {
     case BLOCK_RED:
@@ -44,7 +41,7 @@ function getColor(blockType) {
   }
 }
 
-function drawBackground(array2D) {
+function drawBackground(array2D, squareWidth, squareHeight) {
   for (let x = 0; x < array2D.xCount; x++) {
     for (let y = 0; y < array2D.yCount; y++) {
       ctx.fillStyle = `hsl(200, ${40 + ((x + y) % 2) * 30}%, 20%)`;
@@ -60,23 +57,23 @@ function drawBackground(array2D) {
 
 export function drawGrid(grid, animState) {
   const array2D = grid.array;
+  const squareWidth = canvas.width / array2D.xCount;
+  const squareHeight = canvas.height / array2D.yCount;
 
-  drawBackground(array2D);
+  drawBackground(array2D, squareWidth, squareHeight);
 
   for (let x = 0; x < array2D.xCount; x++) {
     for (let y = 0; y < array2D.yCount; y++) {
       const block = array2D.getValue(x, y);
 
       if (block) {
-        const yShift =
-          Math.min(animState.shiftDownRatio, block.stepsDown) * squareHeight;
-        const xShift =
-          Math.min(animState.shiftLeftRatio, block.stepsLeft) * squareWidth;
+        const yShift = Math.min(animState.yShift, block.yShift) * squareHeight;
+        const xShift = Math.min(animState.xShift, block.xShift) * squareWidth;
 
         ctx.fillStyle = getColor(block.type);
         ctx.fillRect(
-          x * squareWidth - xShift,
-          y * squareHeight + yShift,
+          x * squareWidth + xShift,
+          y * squareHeight - yShift,
           squareWidth,
           squareHeight
         );
@@ -85,23 +82,56 @@ export function drawGrid(grid, animState) {
   }
 }
 
-export function drawScore(number) {
-  const text = number.toString();
+function drawTime(ms) {
+  const totalSeconds = ms / 1000;
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = Math.round(totalSeconds % 60);
+  const pad = seconds < 10 ? "0" : "";
+
+  const text = `${minutes}:${pad}${seconds}`;
 
   ctx.font = "40px Sans-serif";
+  ctx.fillStyle = "blue";
 
   const textWidth = ctx.measureText(text).width;
-  const textAreaWidth = 300;
-  const x = canvas.width - textWidth - 20;
+  const x = canvas.width / 2 - textWidth / 2;
   const y = 50;
 
-  ctx.fillStyle = "lightblue";
-  ctx.globalAlpha = 0.1;
-  ctx.fillRect(canvas.width - textAreaWidth, 0, textAreaWidth, 70);
-
-  ctx.fillStyle = "blue";
-  ctx.globalAlpha = 1;
   ctx.fillText(text, x, y);
+}
+
+function drawTotalScore(number) {
+  const text = number.toString();
+
+  ctx.font = "30px Sans-serif";
+
+  const textWidth = ctx.measureText(text).width;
+  const x = canvas.width - textWidth - 20;
+  const y = 30;
+
+  ctx.fillStyle = "purple";
+  ctx.fillText(text, x, y);
+}
+
+function drawTargetScore(number) {
+  ctx.font = "30px Sans-serif";
+  ctx.fillStyle = "purple";
+  ctx.fillText("Target:", 20, 30);
+
+  ctx.font = "50px Sans-serif";
+  ctx.fillStyle = "purple";
+  ctx.fillText(number.toString(), 20, 80);
+}
+
+export function drawUi(ms, totalScore, targetScore) {
+  ctx.fillStyle = "lightblue";
+  ctx.globalAlpha = 0.3;
+  ctx.fillRect(0, 0, canvas.width, 100);
+  ctx.globalAlpha = 1.0;
+
+  drawTime(ms);
+  drawTotalScore(totalScore);
+  drawTargetScore(targetScore);
 }
 
 export function drawText(text) {

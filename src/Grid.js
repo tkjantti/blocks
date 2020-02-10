@@ -23,22 +23,43 @@
  */
 
 import Array2D from "./Array2D.js";
+import { BLOCK_NONE } from "./Block.js";
 
 export default class Grid {
   constructor(xSquareCount, ySquareCount) {
     this.array = new Array2D(xSquareCount, ySquareCount);
   }
 
-  initialize(getInitialBlockType) {
+  initialize(getBlockType) {
     for (let x = 0; x < this.array.xCount; x++) {
       for (let y = 0; y < this.array.yCount; y++) {
-        this.array.setValue(x, y, {
-          type: getInitialBlockType(),
-          stepsDown: 0,
-          stepsLeft: 0
-        });
+        const type = getBlockType(x, y);
+        if (type) {
+          this.array.setValue(x, y, {
+            type,
+            yShift: 0,
+            xShift: 0
+          });
+        } else {
+          this.array.setValue(x, y, null);
+        }
       }
     }
+  }
+
+  serialize() {
+    return {
+      xCount: this.array.xCount,
+      yCount: this.array.yCount,
+      blocks: this.array.values.map(v => (v ? v.type : BLOCK_NONE))
+    };
+  }
+
+  static deserialize(state) {
+    const grid = new Grid(state.xCount, state.yCount);
+    const blocks = state.blocks;
+    grid.initialize((x, y) => blocks[x * state.yCount + y]);
+    return grid;
   }
 
   hasContiguousArea() {
@@ -152,10 +173,15 @@ export default class Grid {
 
     for (let x = 0; x < this.array.xCount; x++) {
       let emptyBlocksBelowCount = 0;
+
       for (let y = this.array.yCount - 1; y >= 0; y--) {
         const block = this.array.getValue(x, y);
         if (block) {
-          block.stepsDown = emptyBlocksBelowCount;
+          block.yShift = emptyBlocksBelowCount;
+
+          this.array.setValue(x, y, null);
+          this.array.setValue(x, y + block.yShift, block);
+
           topShiftDownCount = Math.max(
             topShiftDownCount,
             emptyBlocksBelowCount
@@ -181,7 +207,9 @@ export default class Grid {
         if (block) {
           allEmpty = false;
           if (emptyColumnCount > 0) {
-            block.stepsLeft = emptyColumnCount;
+            block.xShift = emptyColumnCount;
+            this.array.setValue(x, y, null);
+            this.array.setValue(x - block.xShift, y, block);
           }
         }
       }
@@ -196,34 +224,18 @@ export default class Grid {
     return topShiftLeftCount;
   }
 
-  resetVerticalPositions() {
+  resetShiftValues() {
     for (let x = 0; x < this.array.xCount; x++) {
-      for (let y = this.array.yCount - 1; y >= 0; y--) {
+      for (let y = 0; y < this.array.yCount; y++) {
         let block = this.array.getValue(x, y);
 
-        if (block && block.stepsDown) {
-          if (y + block.stepsDown >= this.array.yCount) {
-            // Shouldn't happen
-            continue;
+        if (block) {
+          if (block.yShift !== 0) {
+            block.yShift = 0;
           }
-
-          this.array.setValue(x, y, null);
-          this.array.setValue(x, y + block.stepsDown, block);
-          block.stepsDown = 0;
-        }
-      }
-    }
-  }
-
-  resetHorizontalPositions() {
-    for (let x = 0; x < this.array.xCount; x++) {
-      for (let y = this.array.yCount - 1; y >= 0; y--) {
-        let block = this.array.getValue(x, y);
-
-        if (block && block.stepsLeft) {
-          this.array.setValue(x, y, null);
-          this.array.setValue(x - block.stepsLeft, y, block);
-          block.stepsLeft = 0;
+          if (block.xShift !== 0) {
+            block.xShift = 0;
+          }
         }
       }
     }
