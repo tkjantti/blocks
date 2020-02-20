@@ -27,10 +27,10 @@ import { canvas, drawGrid } from "./Graphics.js";
 import AnimationState from "./AnimationState.js";
 import { BLOCK_NONE, BLOCK_RED, BLOCK_YELLOW, BLOCK_GREEN } from "./Block.js";
 
-const ANIM_SPEED = 100;
+const ANIM_DURATION = 100;
 
-const xSquareCount = 12;
-const ySquareCount = 9;
+const xSquareCount = 16;
+const ySquareCount = 12;
 
 export class Level {
   constructor() {
@@ -109,33 +109,42 @@ export class Level {
     return this.yShiftSquares > 0 || this.xShiftSquares > 0;
   }
 
+  // t = easingFunction(t)
+  // new_value = start_value +  (t * (end_value - start_value))
+  easingFunction(t) {
+    return --t * t * t + 1;
+  }
+
   animateBlocks(deltaTimeMs) {
     if (this.yShiftSquares > 0) {
       this.yShiftTimeElapsed += deltaTimeMs;
 
-      const currentYShift =
-        this.yShiftSquares - this.yShiftTimeElapsed / ANIM_SPEED;
+      const t = this.easingFunction(this.yShiftTimeElapsed / ANIM_DURATION);
+      const currentYShift = (t * this.yShiftSquares) / ANIM_DURATION;
 
-      if (0 < currentYShift) {
-        this.animState.yShift = currentYShift;
+      if (currentYShift <= this.yShiftSquares) {
+        this.animState.yShift = this.yShiftSquares - currentYShift;
       } else {
         // Stop shift down animation,
         // ready to start horizontal shift.
         this.yShiftTimeElapsed = 0;
         this.yShiftSquares = 0;
+        this.animState.yShift = 0;
       }
     } else if (this.xShiftSquares > 0) {
       this.xShiftTimeElapsed += deltaTimeMs;
 
-      const currentXShift =
-        this.xShiftSquares - this.xShiftTimeElapsed / ANIM_SPEED;
+      const t = this.easingFunction(this.xShiftTimeElapsed / ANIM_DURATION);
+      const currentXShift = (t * this.xShiftSquares) / ANIM_DURATION;
 
-      if (0 < currentXShift) {
-        this.animState.xShift = currentXShift;
+      if (currentXShift <= this.xShiftSquares) {
+        // if (0 < currentXShift) {
+        this.animState.xShift = this.xShiftSquares - currentXShift;
       } else {
         // Shift left animation done
         this.xShiftTimeElapsed = 0;
         this.xShiftSquares = 0;
+        this.animState.xShift = 0;
 
         // Both vertical and horizontal animation done.
         this.grid.resetShiftValues();
