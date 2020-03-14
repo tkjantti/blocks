@@ -22,10 +22,11 @@
  * SOFTWARE.
  */
 
-import { drawText, drawUi } from "./Graphics.js";
+import { drawHighScoreList, drawText, drawUi } from "./Graphics.js";
 import { Level } from "./Level.js";
 
-const GAME_STORAGE_IDENTIFIER = "blocks-state";
+const STORAGE_ID_GAME_STATE = "blocks-state";
+const STORAGE_ID_HIGHSCORE = "blocks-highscore";
 
 const TIME_STEP = 1000 / 60;
 const MAX_FRAME = TIME_STEP * 5;
@@ -44,6 +45,7 @@ export class Game {
     this.score = 0;
     this.targetScore = SCORE_TARGET_BASE;
     this.targetScoreSetCount = 1;
+    this.highScoreList = [];
 
     this.level = new Level();
     this.levelFinishTime = null;
@@ -53,7 +55,7 @@ export class Game {
   }
 
   static load() {
-    const storedData = localStorage.getItem(GAME_STORAGE_IDENTIFIER);
+    const storedData = localStorage.getItem(STORAGE_ID_GAME_STATE);
     if (!storedData) {
       return null;
     }
@@ -74,11 +76,11 @@ export class Game {
       countdownTime: this.countdownTime,
       level: this.level.serialize()
     };
-    localStorage.setItem(GAME_STORAGE_IDENTIFIER, JSON.stringify(state));
+    localStorage.setItem(STORAGE_ID_GAME_STATE, JSON.stringify(state));
   }
 
   clearSavedData() {
-    localStorage.removeItem(GAME_STORAGE_IDENTIFIER);
+    localStorage.removeItem(STORAGE_ID_GAME_STATE);
   }
 
   isOver() {
@@ -95,6 +97,13 @@ export class Game {
     return false;
   }
 
+  loadHighScore() {
+    const data = localStorage.getItem(STORAGE_ID_HIGHSCORE);
+    const list = data ? JSON.parse(data) : [];
+    list.push({ name: "You", score: this.score });
+    return list;
+  }
+
   gameLoop(ms) {
     requestAnimationFrame(this.gameLoop.bind(this));
 
@@ -104,6 +113,8 @@ export class Game {
 
     if (this.gameOverTime == null && !this.updateCountdown(deltaTimeMs)) {
       this.gameOverTime = now;
+
+      this.highScoreList = this.loadHighScore();
     }
 
     this.level.update(deltaTimeMs);
@@ -112,10 +123,9 @@ export class Game {
     drawUi(this.countdownTime, this.score, this.targetScore - this.score);
 
     if (this.gameOverTime != null) {
-      if (now - this.gameOverTime < GAME_OVER_TIMESPAN_MS) {
-        drawText("Game over!");
-      } else {
-        drawText("Click to try again");
+      drawHighScoreList(this.highScoreList);
+
+      if (now - this.gameOverTime >= GAME_OVER_TIMESPAN_MS) {
         this.readyForNewGame = true;
       }
     } else if (this.level.isFinished()) {
