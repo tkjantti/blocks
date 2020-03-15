@@ -24,6 +24,8 @@
 
 const STORAGE_ID_HIGHSCORE = "blocks-highscore";
 
+const LIST_LENGTH = 6;
+
 export class HighScoreList {
   constructor(list) {
     this.list = list;
@@ -42,5 +44,7 @@ export class HighScoreList {
 
   add(entry) {
     this.list.push(entry);
+    this.list.sort((a, b) => b.score - a.score);
+    this.list.splice(LIST_LENGTH);
   }
 }
