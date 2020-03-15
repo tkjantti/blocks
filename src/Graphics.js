@@ -164,13 +164,14 @@ export function drawText(text) {
 }
 
 export function drawHighScoreList(highScoreList) {
+  const entries = highScoreList.list;
   drawLightBackground(canvas.width * 0.8, canvas.height * 0.5);
 
   ctx.font = "30px Sans-serif";
   ctx.fillStyle = "white";
 
-  for (let i = 0; i < highScoreList.length; i++) {
-    const entry = highScoreList[i];
+  for (let i = 0; i < entries.length; i++) {
+    const entry = entries[i];
     const x = canvas.width / 2 - 200;
     const y = canvas.height * 0.35 + i * 35;
     ctx.fillText(entry.name + " " + entry.score, x, y);

@@ -24,9 +24,9 @@
 
 import { drawHighScoreList, drawText, drawUi } from "./Graphics.js";
 import { Level } from "./Level.js";
+import { HighScoreList } from "./HighScoreList.js";
 
 const STORAGE_ID_GAME_STATE = "blocks-state";
-const STORAGE_ID_HIGHSCORE = "blocks-highscore";
 
 const TIME_STEP = 1000 / 60;
 const MAX_FRAME = TIME_STEP * 5;
@@ -97,17 +97,6 @@ export class Game {
     return false;
   }
 
-  loadHighScore() {
-    const data = localStorage.getItem(STORAGE_ID_HIGHSCORE);
-    const list = data ? JSON.parse(data) : [];
-    return list;
-  }
-
-  saveHighScore(list) {
-    const data = JSON.stringify(list);
-    localStorage.setItem(STORAGE_ID_HIGHSCORE, data);
-  }
-
   gameLoop(ms) {
     requestAnimationFrame(this.gameLoop.bind(this));
 
@@ -118,9 +107,9 @@ export class Game {
     if (this.gameOverTime == null && !this.updateCountdown(deltaTimeMs)) {
       this.gameOverTime = now;
 
-      this.highScoreList = this.loadHighScore();
-      this.highScoreList.push({ name: "You", score: this.score });
-      this.saveHighScore(this.highScoreList);
+      this.highScoreList = HighScoreList.load();
+      this.highScoreList.add({ name: "You", score: this.score });
+      this.highScoreList.save();
     }
 
     this.level.update(deltaTimeMs);
