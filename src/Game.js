@@ -100,8 +100,12 @@ export class Game {
   loadHighScore() {
     const data = localStorage.getItem(STORAGE_ID_HIGHSCORE);
     const list = data ? JSON.parse(data) : [];
-    list.push({ name: "You", score: this.score });
     return list;
+  }
+
+  saveHighScore(list) {
+    const data = JSON.stringify(list);
+    localStorage.setItem(STORAGE_ID_HIGHSCORE, data);
   }
 
   gameLoop(ms) {
@@ -115,6 +119,8 @@ export class Game {
       this.gameOverTime = now;
 
       this.highScoreList = this.loadHighScore();
+      this.highScoreList.push({ name: "You", score: this.score });
+      this.saveHighScore(this.highScoreList);
     }
 
     this.level.update(deltaTimeMs);
