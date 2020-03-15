@@ -172,8 +172,9 @@ export function drawHighScoreList(highScoreList) {
 
   for (let i = 0; i < entries.length; i++) {
     const entry = entries[i];
-    const x = canvas.width / 2 - 200;
+    const nameWidth = ctx.measureText(entry.name).width;
+    const x = canvas.width / 2 - nameWidth;
     const y = canvas.height * 0.35 + i * 35;
-    ctx.fillText(entry.name + " " + entry.score, x, y);
+    ctx.fillText(entry.name + "       " + entry.score, x, y);
   }
 }
