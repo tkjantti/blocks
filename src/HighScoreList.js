@@ -26,6 +26,13 @@ const STORAGE_ID_HIGHSCORE = "blocks-highscore";
 
 const LIST_LENGTH = 6;
 
+const DEFAULT_NAMES = [
+  { name: "Mighty Monster", score: 50401 },
+  { name: "SuperVillain", score: 23701 },
+  { name: "Cuddly Kitten", score: 10002 },
+  { name: "Bobby the Bug", score: 998 }
+];
+
 export class HighScoreList {
   constructor(list) {
     this.list = list;
@@ -33,7 +40,7 @@ export class HighScoreList {
 
   static load() {
     const data = localStorage.getItem(STORAGE_ID_HIGHSCORE);
-    const list = data ? JSON.parse(data) : [];
+    const list = data ? JSON.parse(data) : DEFAULT_NAMES;
     return new HighScoreList(list);
   }
 
