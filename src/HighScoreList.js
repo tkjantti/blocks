@@ -22,21 +22,36 @@
  * SOFTWARE.
  */
 
-/*
- * Listens for mouse clicks on top of the given element.
- */
-export function listenMouseClicks(element, handler) {
-  function mouseUp(e) {
-    const rect = element.getBoundingClientRect();
-    const xr = element.width / element.clientWidth;
-    const yr = element.height / element.clientHeight;
-    let x = (e.clientX - rect.left) * xr;
-    let y = (e.clientY - rect.top) * yr;
+const STORAGE_ID_HIGHSCORE = "blocks-highscore";
 
-    if (0 <= x && x < element.width * xr && 0 <= y && y < element.height * xr) {
-      handler(x, y);
-    }
+const LIST_LENGTH = 6;
+
+const DEFAULT_NAMES = [
+  { name: "Mighty Monster", score: 50401 },
+  { name: "SuperVillain", score: 23701 },
+  { name: "Cuddly Kitten", score: 10002 },
+  { name: "Bobby the Bug", score: 998 }
+];
+
+export class HighScoreList {
+  constructor(list) {
+    this.list = list;
   }
 
-  document.addEventListener("mouseup", mouseUp, false);
+  static load() {
+    const data = localStorage.getItem(STORAGE_ID_HIGHSCORE);
+    const list = data ? JSON.parse(data) : DEFAULT_NAMES;
+    return new HighScoreList(list);
+  }
+
+  save() {
+    const data = JSON.stringify(this.list);
+    localStorage.setItem(STORAGE_ID_HIGHSCORE, data);
+  }
+
+  add(entry) {
+    this.list.push(entry);
+    this.list.sort((a, b) => b.score - a.score);
+    this.list.splice(LIST_LENGTH);
+  }
 }

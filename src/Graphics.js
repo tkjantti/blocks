@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Tero Jäntti
+ * Copyright (c) 2019, 2020 Tero Jäntti, Sami Heikkinen
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -134,6 +134,20 @@ export function drawUi(ms, totalScore, targetScore) {
   drawTargetScore(targetScore);
 }
 
+function drawLightBackground(width, height) {
+  ctx.fillStyle = "lightblue";
+  ctx.globalAlpha = 0.4;
+
+  ctx.fillRect(
+    canvas.width / 2 - width / 2,
+    canvas.height / 2 - height / 2,
+    width,
+    height
+  );
+
+  ctx.globalAlpha = 1;
+}
+
 export function drawText(text) {
   ctx.font = "60px Sans-serif";
 
@@ -143,17 +157,24 @@ export function drawText(text) {
   const x = canvas.width / 2 - textWidth / 2;
   const y = canvas.height * 0.45;
 
-  ctx.fillStyle = "lightblue";
-  ctx.globalAlpha = 0.4;
-  ctx.fillRect(
-    canvas.width / 2 - textAreaWidth / 2,
-    canvas.height / 2 - textAreaHeight,
-    textAreaWidth,
-    textAreaHeight
-  );
+  drawLightBackground(textAreaWidth, textAreaHeight);
 
   ctx.fillStyle = "white";
-  ctx.globalAlpha = 1;
+  ctx.fillText(text, x, y + textAreaHeight / 2);
+}
 
-  ctx.fillText(text, x, y);
+export function drawHighScoreList(highScoreList) {
+  const entries = highScoreList.list;
+  drawLightBackground(canvas.width * 0.8, canvas.height * 0.5);
+
+  ctx.font = "30px Sans-serif";
+  ctx.fillStyle = "white";
+
+  for (let i = 0; i < entries.length; i++) {
+    const entry = entries[i];
+    const nameWidth = ctx.measureText(entry.name).width;
+    const x = canvas.width / 2 - nameWidth;
+    const y = canvas.height * 0.35 + i * 35;
+    ctx.fillText(entry.name + "       " + entry.score, x, y);
+  }
 }

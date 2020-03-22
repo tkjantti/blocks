@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Tero Jäntti
+ * Copyright (c) 2019, 2020 Tero Jäntti, Sami Heikkinen
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -22,10 +22,11 @@
  * SOFTWARE.
  */
 
-import { drawText, drawUi } from "./Graphics.js";
+import { drawHighScoreList, drawText, drawUi } from "./Graphics.js";
 import { Level } from "./Level.js";
+import { HighScoreList } from "./HighScoreList.js";
 
-const GAME_STORAGE_IDENTIFIER = "blocks-state";
+const STORAGE_ID_GAME_STATE = "blocks-state";
 
 const TIME_STEP = 1000 / 60;
 const MAX_FRAME = TIME_STEP * 5;
@@ -44,6 +45,7 @@ export class Game {
     this.score = 0;
     this.targetScore = SCORE_TARGET_BASE;
     this.targetScoreSetCount = 1;
+    this.highScoreList = [];
 
     this.level = new Level();
     this.levelFinishTime = null;
@@ -53,7 +55,7 @@ export class Game {
   }
 
   static load() {
-    const storedData = localStorage.getItem(GAME_STORAGE_IDENTIFIER);
+    const storedData = localStorage.getItem(STORAGE_ID_GAME_STATE);
     if (!storedData) {
       return null;
     }
@@ -74,11 +76,11 @@ export class Game {
       countdownTime: this.countdownTime,
       level: this.level.serialize()
     };
-    localStorage.setItem(GAME_STORAGE_IDENTIFIER, JSON.stringify(state));
+    localStorage.setItem(STORAGE_ID_GAME_STATE, JSON.stringify(state));
   }
 
   clearSavedData() {
-    localStorage.removeItem(GAME_STORAGE_IDENTIFIER);
+    localStorage.removeItem(STORAGE_ID_GAME_STATE);
   }
 
   isOver() {
@@ -104,6 +106,10 @@ export class Game {
 
     if (this.gameOverTime == null && !this.updateCountdown(deltaTimeMs)) {
       this.gameOverTime = now;
+
+      this.highScoreList = HighScoreList.load();
+      this.highScoreList.add({ name: "You", score: this.score });
+      this.highScoreList.save();
     }
 
     this.level.update(deltaTimeMs);
@@ -112,10 +118,9 @@ export class Game {
     drawUi(this.countdownTime, this.score, this.targetScore - this.score);
 
     if (this.gameOverTime != null) {
-      if (now - this.gameOverTime < GAME_OVER_TIMESPAN_MS) {
-        drawText("Game over!");
-      } else {
-        drawText("Click to try again");
+      drawHighScoreList(this.highScoreList);
+
+      if (now - this.gameOverTime >= GAME_OVER_TIMESPAN_MS) {
         this.readyForNewGame = true;
       }
     } else if (this.level.isFinished()) {
