@@ -47,6 +47,34 @@ export default class Grid {
     }
   }
 
+  initializeEmptySquares(getBlockType) {
+    for (let x = 0; x < this.array.xCount; x++) {
+      for (let y = 0; y < this.array.yCount; y++) {
+        if (this.array.getValue(x, y) == null) {
+          const type = getBlockType(x, y);
+          if (type) {
+            this.array.setValue(x, y, {
+              type,
+              yShift: 0,
+              xShift: 0
+            });
+          } else {
+            this.array.setValue(x, y, null);
+          }
+        }
+      }
+    }
+  }
+
+  copyFrom(otherGrid) {
+    for (let x = 0; x < this.array.xCount; x++) {
+      for (let y = 0; y < this.array.yCount; y++) {
+        const value = otherGrid.array.getValue(x, y);
+        this.array.setValue(x, y, value);
+      }
+    }
+  }
+
   serialize() {
     return {
       xCount: this.array.xCount,

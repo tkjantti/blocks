@@ -133,7 +133,7 @@ export class Game {
         const oldLevel = this.level;
 
         this.level = new Level();
-        this.level.fill();
+        this.level.fill(oldLevel);
         this.levelFinishTime = null;
 
         this.save();

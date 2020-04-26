@@ -32,6 +32,12 @@ const ANIM_DURATION = 100;
 const xSquareCount = 16;
 const ySquareCount = 12;
 
+const blockTypes = [BLOCK_RED, BLOCK_YELLOW, BLOCK_GREEN];
+
+function getRandomBlockType() {
+  return blockTypes[Math.floor(Math.random() * blockTypes.length)];
+}
+
 export class Level {
   constructor() {
     this.grid = new Grid(xSquareCount, ySquareCount, BLOCK_NONE);
@@ -44,11 +50,13 @@ export class Level {
     this.xShiftSquares = 0;
   }
 
-  fill() {
-    const blockTypes = [BLOCK_RED, BLOCK_YELLOW, BLOCK_GREEN];
-    this.grid.initialize(
-      () => blockTypes[Math.floor(Math.random() * blockTypes.length)]
-    );
+  fill(oldLevel) {
+    if (oldLevel) {
+      this.grid.copyFrom(oldLevel.grid);
+      this.grid.initializeEmptySquares(getRandomBlockType);
+    } else {
+      this.grid.initialize(getRandomBlockType);
+    }
   }
 
   serialize() {
