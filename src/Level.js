@@ -52,8 +52,13 @@ export class Level {
 
   fill(oldLevel) {
     if (oldLevel) {
+      const yShiftAnimForNewSquares = 6;
       this.grid.copyFrom(oldLevel.grid);
-      this.grid.initializeEmptySquares(getRandomBlockType);
+      this.grid.initializeEmptySquares(
+        getRandomBlockType,
+        yShiftAnimForNewSquares
+      );
+      this.yShiftSquares = yShiftAnimForNewSquares;
     } else {
       this.grid.initialize(getRandomBlockType);
     }
