@@ -42,7 +42,9 @@ export class Level {
 
     this.xShiftTimeElapsed = 0;
     this.xShiftSquares = 0;
+  }
 
+  fill() {
     const blockTypes = [BLOCK_RED, BLOCK_YELLOW, BLOCK_GREEN];
     this.grid.initialize(
       () => blockTypes[Math.floor(Math.random() * blockTypes.length)]
