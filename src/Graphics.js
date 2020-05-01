@@ -55,7 +55,7 @@ function drawBackground(array2D, squareWidth, squareHeight) {
   }
 }
 
-export function drawGrid(grid, animState) {
+export function drawGrid(grid, animState, endAnimation) {
   const array2D = grid.array;
   const squareWidth = canvas.width / array2D.xCount;
   const squareHeight = canvas.height / array2D.yCount;
@@ -67,18 +67,32 @@ export function drawGrid(grid, animState) {
       const block = array2D.getValue(x, y);
 
       if (block) {
+        ctx.save();
+
         const yShift = Math.min(animState.yShift, block.yShift) * squareHeight;
         const xShift = Math.min(animState.xShift, block.xShift) * squareWidth;
 
+        ctx.translate(x * squareWidth, y * squareHeight);
+        ctx.translate(xShift, -yShift);
+
+        if (endAnimation) {
+          const angleVariation = (x + y) % 21;
+          ctx.translate(squareWidth / 2, squareHeight / 2);
+          ctx.scale(animState.scale, animState.scale);
+          ctx.rotate(animState.angle + angleVariation);
+          ctx.translate(-squareWidth / 2, -squareHeight / 2);
+        }
+
         ctx.fillStyle = getColor(block.type);
-        ctx.fillRect(
-          x * squareWidth + xShift,
-          y * squareHeight - yShift,
-          squareWidth,
-          squareHeight
-        );
+        ctx.fillRect(0, 0, squareWidth, squareHeight);
+        ctx.restore();
       }
     }
+  }
+
+  if (endAnimation) {
+    animState.angle += Math.PI / 200;
+    animState.scale *= 0.98;
   }
 }
 

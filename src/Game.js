@@ -90,7 +90,7 @@ export class Game {
 
   // Returns true when a new game is requested.
   onClick(screenX, screenY) {
-    if (this.gameOverTime != null) {
+    if (this.isOver()) {
       return this.readyForNewGame;
     }
 
@@ -115,7 +115,7 @@ export class Game {
 
     this.level.update(deltaTimeMs);
 
-    this.level.draw();
+    this.level.draw(this.gameOverTime != null);
     drawUi(this.countdownTime, this.score, this.targetScore - this.score);
 
     if (this.gameOverTime != null) {

@@ -80,8 +80,8 @@ export class Level {
     this.animateBlocks(deltaTimeMs);
   }
 
-  draw() {
-    drawGrid(this.grid, this.animState);
+  draw(endAnimation) {
+    drawGrid(this.grid, this.animState, endAnimation);
   }
 
   isFinished() {
