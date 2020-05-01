@@ -28,5 +28,6 @@ export default class AnimationState {
     this.yShift = 0;
     this.angle = 0;
     this.scale = 1;
+    this.endAnimationTimeElapsed = 0;
   }
 }

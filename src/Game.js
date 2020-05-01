@@ -115,7 +115,7 @@ export class Game {
 
     this.level.update(deltaTimeMs);
 
-    this.level.draw(this.gameOverTime != null);
+    this.level.draw(deltaTimeMs, this.gameOverTime != null);
     drawUi(this.countdownTime, this.score, this.targetScore - this.score);
 
     if (this.gameOverTime != null) {

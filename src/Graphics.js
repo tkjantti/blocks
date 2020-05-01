@@ -24,6 +24,8 @@
 
 import { BLOCK_RED, BLOCK_YELLOW, BLOCK_GREEN } from "./Block.js";
 
+const END_ANIM_LENGTH = 2000;
+
 export const canvas = document.querySelector("#board canvas");
 
 const ctx = canvas.getContext("2d");
@@ -55,7 +57,7 @@ function drawBackground(array2D, squareWidth, squareHeight) {
   }
 }
 
-export function drawGrid(grid, animState, endAnimation) {
+export function drawGrid(grid, deltaTimeMs, animState, endAnimation) {
   const array2D = grid.array;
   const squareWidth = canvas.width / array2D.xCount;
   const squareHeight = canvas.height / array2D.yCount;
@@ -76,7 +78,7 @@ export function drawGrid(grid, animState, endAnimation) {
         ctx.translate(xShift, -yShift);
 
         if (endAnimation) {
-          const angleVariation = (x + y) % 21;
+          const angleVariation = (((((x + y) % 7) + 1) / 8) * Math.PI) / 20;
           ctx.translate(squareWidth / 2, squareHeight / 2);
           ctx.scale(animState.scale, animState.scale);
           ctx.rotate(animState.angle + angleVariation);
@@ -91,9 +93,17 @@ export function drawGrid(grid, animState, endAnimation) {
   }
 
   if (endAnimation) {
-    animState.angle += Math.PI / 200;
-    animState.scale *= 0.98;
+    const x = animState.endAnimationTimeElapsed / END_ANIM_LENGTH;
+
+    animState.angle = easeInExpo(x) * Math.PI * 2;
+    animState.scale = Math.max(0, 1 - easeInExpo(x));
+
+    animState.endAnimationTimeElapsed += deltaTimeMs;
   }
+}
+
+function easeInExpo(x) {
+  return x === 0 ? 0 : Math.pow(2, 10 * x - 10);
 }
 
 function drawTime(ms) {
