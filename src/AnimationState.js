@@ -26,5 +26,8 @@ export default class AnimationState {
   constructor() {
     this.xShift = 0;
     this.yShift = 0;
+    this.angle = 0;
+    this.scale = 1;
+    this.endAnimationTimeElapsed = 0;
   }
 }

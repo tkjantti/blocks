@@ -48,6 +48,7 @@ export class Game {
     this.highScoreList = [];
 
     this.level = new Level();
+    this.level.fill();
     this.levelFinishTime = null;
 
     this.gameOverTime = null;
@@ -89,7 +90,7 @@ export class Game {
 
   // Returns true when a new game is requested.
   onClick(screenX, screenY) {
-    if (this.gameOverTime != null) {
+    if (this.isOver()) {
       return this.readyForNewGame;
     }
 
@@ -114,7 +115,7 @@ export class Game {
 
     this.level.update(deltaTimeMs);
 
-    this.level.draw();
+    this.level.draw(deltaTimeMs, this.gameOverTime != null);
     drawUi(this.countdownTime, this.score, this.targetScore - this.score);
 
     if (this.gameOverTime != null) {
@@ -129,7 +130,10 @@ export class Game {
       } else if (now - this.levelFinishTime < LEVEL_FINISH_TIMESPAN_MS) {
         drawText("Level done!");
       } else {
+        const oldLevel = this.level;
+
         this.level = new Level();
+        this.level.fill(oldLevel);
         this.levelFinishTime = null;
 
         this.save();

@@ -44,6 +44,9 @@ function initializeGame() {
     if (game.isOver()) {
       game.clearSavedData();
     } else {
+      // If level size needs to be changed,
+      // uncomment this (and clear local storage if needed),
+      // so that old size does not get stored to memory.
       game.save();
     }
   });
